@@ -1,0 +1,8 @@
+2024-12-02 19:17:04 - ERROR: Cannot drop table 'ciudad' referenced by a foreign key constraint 'concesionario_ibfk_1' on table 'concesionario'.
+2024-12-02 19:17:04 - ERROR: 	com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130)
+2024-12-02 19:17:04 - ERROR: 	com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+2024-12-02 19:17:04 - ERROR: 	com.mysql.cj.jdbc.StatementImpl.executeInternal(StatementImpl.java:767)
+2024-12-02 19:17:04 - ERROR: 	com.mysql.cj.jdbc.StatementImpl.execute(StatementImpl.java:652)
+2024-12-02 19:17:04 - ERROR: 	persistencia.ConexionJDBC.crearBD(ConexionJDBC.java:80)
+2024-12-02 19:17:04 - ERROR: 	interfaz.Inicio.iniciarBD(Inicio.java:333)
+2024-12-02 19:17:04 - ERROR: 	interfaz.Inicio.main(Inicio.java:41)

@@ -11,6 +11,9 @@ public class MensajesError {
 	 * Error conexión base de datos
 	 */
 	public static final String ERROR_CONEXION_BASE_DE_DATOS = "Se ha producido un error con la conexión a base de datos";
+	
+	public static final String PARAMETROS_OBLIGATORIOS_NO_PRESENTES = "No se ha introducido correctamenete el parámetro: ";
+	
 	/**
 	 * Error inesperado
 	 */

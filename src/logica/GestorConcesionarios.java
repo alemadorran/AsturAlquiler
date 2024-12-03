@@ -10,7 +10,8 @@ import java.util.List;
 import excepciones.CiudadNoEncontradaException;
 import excepciones.CocheNoEncontradoException;
 import excepciones.ConcesionarioNoEncontradoException;
-import excepciones.ErrorConexionJDBC;
+import excepciones.DatosObligatoriosNoPresentesException;
+import excepciones.ErrorConexionJDBCException;
 import excepciones.MensajesError;
 import logger.LoggerAplicacion;
 import modelo.Ciudad;
@@ -35,7 +36,6 @@ public class GestorConcesionarios {
 	String CSV_CONCESIONARIO = "";
 	String CSV_CIUDAD = "";
 	String CSV_COCHE = "";
-
 	
     /**
      * 
@@ -52,12 +52,17 @@ public class GestorConcesionarios {
 	 * Añadimos una nueva ciudad 
 	 * 
 	 * @param ciudad
+	 * @throws DatosObligatoriosNoPresentesException 
 	 */
-	public boolean crearCiudad(Ciudad ciudad) {
+	public boolean crearCiudad(Ciudad ciudad) throws DatosObligatoriosNoPresentesException {
+		//Verificamos los parámetros
+		if(ciudad != null) {
+			veriricaParametro(ciudad.getCodigo(), "codigo ciudad");
+			veriricaParametro(ciudad.getNombre(), "nombre ciudad");
+		}
 		//Actualizamos base de datos
 		return GestorJDBC.crearCiudad(ciudad);
 	}
-
 	/**
 	 * 
 	 * Leemos todas las ciudades
@@ -78,7 +83,7 @@ public class GestorConcesionarios {
 	 * @param codigo : String
 	 * @throws CiudadNoEncontradaException
 	 */
-	public void borrarCiudad(String codigo) throws CiudadNoEncontradaException {
+	public boolean borrarCiudad(String codigo) throws CiudadNoEncontradaException {
 		
 		boolean ciudadBorrada = true;
 		ciudadBorrada = GestorJDBC.borrarCiudad(codigo);
@@ -86,6 +91,7 @@ public class GestorConcesionarios {
 		if(ciudadBorrada == false) {
 			throw new CiudadNoEncontradaException("Ciudad no encontrada con el código: " + codigo);	
 		}
+		return true;
 		
 	}
 
@@ -127,9 +133,9 @@ public class GestorConcesionarios {
 	 * @param codigoC
 	 * @param nombreConcecionario
 	 * @throws ConcesionarioNoEncontradoException 
-	 * @throws ErrorConexionJDBC 
+	 * @throws ErrorConexionJDBCException 
 	 */
-	public boolean actualizarConcesionario(String codigoC, String nombreConcecionario) throws ConcesionarioNoEncontradoException, ErrorConexionJDBC {
+	public boolean actualizarConcesionario(String codigoC, String nombreConcecionario) throws ConcesionarioNoEncontradoException, ErrorConexionJDBCException {
 		
 	
 		Concesionario concesionarioAActualizar = null; 
@@ -163,9 +169,9 @@ public class GestorConcesionarios {
 	 * @param codigo
 	 * @return 
 	 * @throws ConcesionarioNoEncontradoException 
-	 * @throws ErrorConexionJDBC 
+	 * @throws ErrorConexionJDBCException 
 	 */
-	public boolean borrarConcesionario(String codigo) throws ConcesionarioNoEncontradoException, ErrorConexionJDBC {
+	public boolean borrarConcesionario(String codigo) throws ConcesionarioNoEncontradoException, ErrorConexionJDBCException {
 		
 		Concesionario concesionarioABorrar = null;
 		
@@ -192,9 +198,9 @@ public class GestorConcesionarios {
 	 * Añadimos un nuevo coche
 	 * 
 	 * @param nuevoCoche
-	 * @throws ErrorConexionJDBC 
+	 * @throws ErrorConexionJDBCException 
 	 */
-	public boolean crearCocher(Coche nuevoCoche) throws ErrorConexionJDBC {
+	public boolean crearCocher(Coche nuevoCoche) throws ErrorConexionJDBCException {
 		
 		return GestorJDBC.crearCoche(nuevoCoche);
 		
@@ -304,6 +310,15 @@ public class GestorConcesionarios {
 				LoggerAplicacion.logError(e);
 			}
 
+		}
+		
+	}
+	
+
+	private void veriricaParametro(String parametro, String tipoParametro) throws DatosObligatoriosNoPresentesException {
+	
+		if (parametro == null || parametro.isEmpty()) {
+			throw new DatosObligatoriosNoPresentesException(MensajesError.PARAMETROS_OBLIGATORIOS_NO_PRESENTES + tipoParametro);
 		}
 		
 	}

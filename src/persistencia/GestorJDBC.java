@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import excepciones.ConcesionarioNoEncontradoException;
-import excepciones.ErrorConexionJDBC;
+import excepciones.ErrorConexionJDBCException;
 import excepciones.MensajesError;
 
 import java.sql.*;
@@ -36,6 +36,7 @@ public class GestorJDBC {
 			}
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
+			return false;
 		}finally {
 			conexionJDBC.closeConnection();
 		}
@@ -95,6 +96,7 @@ public class GestorJDBC {
 			
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
+			return false;
 		}finally {
 			conexionJDBC.closeConnection();
 		}
@@ -119,6 +121,7 @@ public class GestorJDBC {
 			}
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
+			return false;
 		}finally {
 			conexionJDBC.closeConnection();
 		}
@@ -162,7 +165,7 @@ public class GestorJDBC {
 		return listaConcesionarios;
 	}
 
-	public static boolean actualizarConcesionario(Concesionario c) throws ErrorConexionJDBC {
+	public static boolean actualizarConcesionario(Concesionario c) throws ErrorConexionJDBCException {
 		
 		Connection conexion = null;
 		Statement st = null;
@@ -181,7 +184,7 @@ public class GestorJDBC {
 			}
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
-			throw new ErrorConexionJDBC("Un error inesperado se ha producido. Inténtelo más tarde.");
+			throw new ErrorConexionJDBCException("Un error inesperado se ha producido. Inténtelo más tarde.");
 		}finally {
 			conexionJDBC.closeConnection();
 		}
@@ -189,7 +192,7 @@ public class GestorJDBC {
 		
 	}
 
-	public static boolean borrarConcesionario(Concesionario c) throws ErrorConexionJDBC {
+	public static boolean borrarConcesionario(Concesionario c) throws ErrorConexionJDBCException {
 		
 		Connection conexion = null;
 		Statement st = null;
@@ -208,7 +211,7 @@ public class GestorJDBC {
 			
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
-			throw new ErrorConexionJDBC(MensajesError.ERROR_CONEXION_BASE_DE_DATOS);
+			throw new ErrorConexionJDBCException(MensajesError.ERROR_CONEXION_BASE_DE_DATOS);
 		}finally {
 			conexionJDBC.closeConnection();
 		}
@@ -216,7 +219,7 @@ public class GestorJDBC {
 		
 	}
 
-	public static boolean crearCoche(Coche c) throws ErrorConexionJDBC {
+	public static boolean crearCoche(Coche c) throws ErrorConexionJDBCException {
 		
 		Connection conexion = null;
 		Statement st = null;
@@ -234,7 +237,7 @@ public class GestorJDBC {
 			}
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
-			throw new ErrorConexionJDBC(MensajesError.ERROR_CONEXION_BASE_DE_DATOS);
+			throw new ErrorConexionJDBCException(MensajesError.ERROR_CONEXION_BASE_DE_DATOS);
 		}finally {
 			conexionJDBC.closeConnection();
 		}

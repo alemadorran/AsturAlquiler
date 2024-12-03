@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS ciudad;
 
 CREATE TABLE ciudad (
   codigo varchar(10) NOT NULL,    
-  nombre varchar(45) DEFAULT NULL,
+  nombre varchar(45) NOT NULL,
   PRIMARY KEY (codigo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS concesionario;
 
 CREATE TABLE concesionario (
   codigo_concesionario varchar(10) NOT NULL,    
-  nombre varchar(45) DEFAULT NULL,
+  nombre varchar(45) NOT NULL,
   codigo_ciudad varchar(10) NOT NULL,  
   PRIMARY KEY (codigo_concesionario),
   FOREIGN KEY (codigo_ciudad) REFERENCES ciudad(codigo)

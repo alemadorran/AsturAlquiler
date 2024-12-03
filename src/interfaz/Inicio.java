@@ -9,8 +9,9 @@ import java.util.Scanner;
 import excepciones.CiudadNoEncontradaException;
 import excepciones.CocheNoEncontradoException;
 import excepciones.ConcesionarioNoEncontradoException;
-import excepciones.ErrorConexionJDBC;
-import excepciones.ErrorInesperado;
+import excepciones.DatosObligatoriosNoPresentesException;
+import excepciones.ErrorConexionJDBCException;
+import excepciones.ErrorInesperadoException;
 import excepciones.MensajesError;
 import logger.LoggerAplicacion;
 import logica.GestorConcesionarios;
@@ -41,24 +42,19 @@ public class Inicio {
      */
 	public static void main(String[] args) {
 		iniciarBD();
-		try {
-			mostrarMenuInicio();
-		} catch (ErrorConexionJDBC e) {
-			System.out.println(e.getMessage());
-			LoggerAplicacion.logError(e);
-		} catch (ErrorInesperado e) {
-			System.out.println(e.getMessage());
-			LoggerAplicacion.logError(e);
-		}
+		
+		mostrarMenuInicio();
+		
 	}
 	/**
 	 * 
 	 * Muestra el menú principal de la aplicación
-	 * @throws ErrorConexionJDBC 
-	 * @throws ErrorInesperado 
+	 * @throws ErrorConexionJDBCException 
+	 * @throws ErrorInesperadoException 
+	 * @throws DatosObligatoriosNoPresentesException 
 	 * 
 	 */
-	public static void mostrarMenuInicio() throws ErrorConexionJDBC, ErrorInesperado {
+	public static void mostrarMenuInicio(){
 		System.out.println("##########################################");
 		System.out.println("###### BIENVENIDO A ASTURALQUILER.SA #####");
 		System.out.println("##########################################");
@@ -81,10 +77,20 @@ public class Inicio {
 			    menuCiudad();
 				break;
 			case 2: 
-				menuConcesionario();
+				try {
+					menuConcesionario();
+				} catch (ErrorConexionJDBCException | ErrorInesperadoException e) {
+					System.out.println(e.getMessage());
+					LoggerAplicacion.logError(e);
+				}
 				break;
 			case 3: 
-				menuCoche();
+				try {
+					menuCoche();
+				} catch (ErrorConexionJDBCException e) {
+					System.out.println(e.getMessage());
+					LoggerAplicacion.logError(e);
+				}
 				break;
 			case 0: 
 				System.out.println("Saliendo de la aplicación...");
@@ -101,6 +107,7 @@ public class Inicio {
 	/**
 	 * 
 	 * Menu de acciones con Ciudad
+	 * @throws DatosObligatoriosNoPresentesException 
 	 * 
 	 */
 	public static void menuCiudad() {
@@ -118,7 +125,11 @@ public class Inicio {
 		respuestaUsuario= Integer.parseInt(sc.nextLine());
 		switch (respuestaUsuario) {
 		case 1:
-			crearCiudad();
+			try {
+				crearCiudad();
+			} catch (DatosObligatoriosNoPresentesException e) {
+				System.out.println(e.getMessage());
+			}
 			break;
 		case 2:
 			 leerCiudades();
@@ -149,9 +160,10 @@ public class Inicio {
 	}
 	/**
 	 * Método para crear ciudad
+	 * @throws DatosObligatoriosNoPresentesException 
 	 * 
 	 */
-	private static void crearCiudad() {
+	private static void crearCiudad() throws DatosObligatoriosNoPresentesException {
 		
 		System.out.println("Indica el código de la ciudad: ");
 		String codigoCiudad = sc.nextLine();
@@ -189,11 +201,11 @@ public class Inicio {
 	/**
 	 * 
 	 * Mostrar menu Concesionario
-	 * @throws ErrorConexionJDBC 
-	 * @throws ErrorInesperado 
+	 * @throws ErrorConexionJDBCException 
+	 * @throws ErrorInesperadoException 
 	 * 
 	 */
-	public static void menuConcesionario() throws ErrorConexionJDBC, ErrorInesperado {
+	public static void menuConcesionario() throws ErrorConexionJDBCException, ErrorInesperadoException {
 		int respuestaUsuario;
 		do {
 			System.out.println("##########################################");	
@@ -230,18 +242,18 @@ public class Inicio {
 		}while(respuestaUsuario != 0);
 	}
 
-	private static void borrarConcesionario() throws ErrorInesperado, ErrorConexionJDBC {
+	private static void borrarConcesionario() throws ErrorInesperadoException, ErrorConexionJDBCException {
 		System.out.println("Indica el código del concesionario a borrar: ");
 		String codigo = sc.nextLine();
 		try {
 			if (gestorConcesionarios.borrarConcesionario(codigo)) System.out.println("Concesionario borrado correctamente");
-			else throw new ErrorInesperado(MensajesError.ERROR_INESPERADO);
+			else throw new ErrorInesperadoException(MensajesError.ERROR_INESPERADO);
 		} catch (ConcesionarioNoEncontradoException e) {
 			System.out.println(e.getMessage());
 			LoggerAplicacion.logError(e);
 		}
 	}
-	private static void actualizarConcesionario() throws ErrorConexionJDBC, ErrorInesperado {
+	private static void actualizarConcesionario() throws ErrorConexionJDBCException, ErrorInesperadoException {
 		System.out.println();
 		System.out.println("#### Actualización de concesionarios ####");
 		System.out.print("Indica el codigo del concesionario: ");
@@ -251,7 +263,7 @@ public class Inicio {
 		
 		try {
 			if(gestorConcesionarios.actualizarConcesionario(codigoC, nombreConcesionario)) System.out.println("Concesionario modificado correctamente");
-			else throw new ErrorInesperado(MensajesError.ERROR_INESPERADO);
+			else throw new ErrorInesperadoException(MensajesError.ERROR_INESPERADO);
 		}catch (ConcesionarioNoEncontradoException e) {
 			System.out.println(e.getMessage());
 			LoggerAplicacion.logError(e);
@@ -271,7 +283,7 @@ public class Inicio {
 		
 		
 	}
-	private static void crearConcesionario() throws ErrorInesperado {
+	private static void crearConcesionario() throws ErrorInesperadoException {
 		System.out.println();
 		System.out.print("Indica el código del concesionario: ");
 		String codigoCoche = sc.nextLine();
@@ -282,16 +294,16 @@ public class Inicio {
 ;		Concesionario nuevoConcesionario = new Concesionario(codigoCoche, nombreConcecionario, codigoCiudad);
 		
 		if( gestorConcesionarios.crearConcesionario(nuevoConcesionario)) System.out.println("Concesionario creado correctamente");
-		else throw new ErrorInesperado(MensajesError.ERROR_INESPERADO);
+		else throw new ErrorInesperadoException(MensajesError.ERROR_INESPERADO);
 		
 	}
 	/**
 	 * 
 	 * Mostrar menu Coche
-	 * @throws ErrorConexionJDBC 
+	 * @throws ErrorConexionJDBCException 
 	 * 
 	 */
-	private static void menuCoche() throws ErrorConexionJDBC {
+	private static void menuCoche() throws ErrorConexionJDBCException {
 		int respuestaUsuario;
 		do {
 			
@@ -354,7 +366,7 @@ public class Inicio {
 		}while(respuestaUsuario != 0);
 		
 	}
-	private static void crearCoche() throws ErrorConexionJDBC {
+	private static void crearCoche() throws ErrorConexionJDBCException {
 		
 		System.out.println("Indica la marca: ");
 		String marca = sc.nextLine();

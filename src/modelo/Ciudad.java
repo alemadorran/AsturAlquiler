@@ -114,8 +114,7 @@ public class Ciudad implements Serializable {
      */
     @Override
     public String toString() {
-        return String.format("Detalles de la ciudad:\n" +
-                             "---------------------------------\n" +
+        return String.format("---------------------------------\n" +
                              "Código de la ciudad: %s\n" +
                              "Nombre: %s\n" +
                              "Número de concesionarios: %d\n", 

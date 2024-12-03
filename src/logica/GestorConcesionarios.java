@@ -10,6 +10,8 @@ import java.util.List;
 import excepciones.CiudadNoEncontradaException;
 import excepciones.CocheNoEncontradoException;
 import excepciones.ConcesionarioNoEncontradoException;
+import excepciones.ErrorConexionJDBC;
+import excepciones.MensajesError;
 import logger.LoggerAplicacion;
 import modelo.Ciudad;
 import modelo.Coche;
@@ -52,8 +54,6 @@ public class GestorConcesionarios {
 	 * @param ciudad
 	 */
 	public boolean crearCiudad(Ciudad ciudad) {
-		//Actualizamos memoria dinámica
-		listaCiudades.add(ciudad);
 		//Actualizamos base de datos
 		return GestorJDBC.crearCiudad(ciudad);
 	}
@@ -95,17 +95,13 @@ public class GestorConcesionarios {
 	 * 
 	 * @param nuevoConcesionario
 	 */
-	public void crearConcesionario(Concesionario nuevoConcesionario) {
+	public boolean crearConcesionario(Concesionario nuevoConcesionario) {
 		
-		this.listaConcesionarios.add(nuevoConcesionario);
-		/*
-		try {
-			GestionArchivoCSV.crearConcesionario(listaConcesionarios, CSV_CONCESIONARIO);
-		} catch (IOException e) {
-			System.out.println("No se ha podido encontrar el archivo: " + CSV_CONCESIONARIO);
-			LoggerAplicacion.logError(e);
+		if(GestorJDBC.crearConcesionario(nuevoConcesionario)) {
+			return true;
+		}else {
+			return false;
 		}
-		*/
 		
 	}
 
@@ -115,19 +111,11 @@ public class GestorConcesionarios {
 	 * 
 	 * @return
 	 */
-	public List<Concesionario> leerConcesionario() {
+	public List<Concesionario> leerConcesionarios() {
 
 		List<Concesionario> listaconcesionario = null; 
-		/*
-		try {
-			//Actualiza la lista en memoria 
-			this.listaConcesionarios = GestionArchivoCSV.leerConcesionarios(CSV_CONCESIONARIO, CSV_COCHE);
-		} catch (IOException e) {
-			System.out.println("No se ha podido encontrar el archivo: " + CSV_CONCESIONARIO);
-			LoggerAplicacion.logError(e);
-		}
-		*/
-		listaconcesionario = this.listaConcesionarios;
+		
+		listaconcesionario = GestorJDBC.leerConcesionarios();
 		
 		return listaconcesionario;
 
@@ -139,18 +127,14 @@ public class GestorConcesionarios {
 	 * @param codigoC
 	 * @param nombreConcecionario
 	 * @throws ConcesionarioNoEncontradoException 
+	 * @throws ErrorConexionJDBC 
 	 */
-	public void actualizarConcesionario(String codigoC, String nombreConcecionario) throws ConcesionarioNoEncontradoException {
+	public boolean actualizarConcesionario(String codigoC, String nombreConcecionario) throws ConcesionarioNoEncontradoException, ErrorConexionJDBC {
 		
-		//Sincronizar la lista en memoria
-		try {
-			this.listaConcesionarios = GestionArchivoCSV.leerConcesionarios(CSV_CONCESIONARIO, CSV_COCHE);
-		} catch (IOException e) {
-			System.out.println("No se ha podido encontrar el archivo: " + CSV_CONCESIONARIO);
-			LoggerAplicacion.logError(e);
-		}
-		
+	
 		Concesionario concesionarioAActualizar = null; 
+		
+		ArrayList<Concesionario> listaConcesionarios = GestorJDBC.leerConcesionarios(); 
 		
 		//Buscamos el concesionario con el mismo código
 		for(Concesionario concesionario : listaConcesionarios) {
@@ -161,17 +145,12 @@ public class GestorConcesionarios {
 		
 		//Verificamos si se ha encontrado el concesionario 
 		if(concesionarioAActualizar == null) {
-			throw new ConcesionarioNoEncontradoException("El concecionario con el código " + codigoC + " no ha sido encontrado");
+			throw new ConcesionarioNoEncontradoException("El concecionario con el código " + codigoC + " no ha sido registrado");
 		}else {
 			//Modificamos nombre del concesionario
 			concesionarioAActualizar.setNombre(nombreConcecionario);
 			
-			try {
-				GestionArchivoCSV.crearConcesionario(this.listaConcesionarios, CSV_CONCESIONARIO);
-			} catch (IOException e) {
-				System.out.println("No se ha podido encontrar el archivo: " + CSV_CONCESIONARIO);
-				LoggerAplicacion.logError(e);
-			}
+			return GestorJDBC.actualizarConcesionario(concesionarioAActualizar);
 			
 		}
 		
@@ -182,11 +161,15 @@ public class GestorConcesionarios {
 	 * Borramos concesionario por su código
 	 * 
 	 * @param codigo
+	 * @return 
 	 * @throws ConcesionarioNoEncontradoException 
+	 * @throws ErrorConexionJDBC 
 	 */
-	public void borrarConcesionario(String codigo) throws ConcesionarioNoEncontradoException {
+	public boolean borrarConcesionario(String codigo) throws ConcesionarioNoEncontradoException, ErrorConexionJDBC {
 		
 		Concesionario concesionarioABorrar = null;
+		
+		ArrayList<Concesionario> listaConcesionarios = GestorJDBC.leerConcesionarios();
 		
 		for(Concesionario concesionario: listaConcesionarios) {
 			
@@ -197,19 +180,10 @@ public class GestorConcesionarios {
 		}
 		
 		if(concesionarioABorrar == null) {
-			throw new ConcesionarioNoEncontradoException("Concesionario no encontrado con el código: " + codigo);
-		}else {
-			//La borramos de la lista
-			listaConcesionarios.remove(concesionarioABorrar);
-			try {
-				//Lo que hacemos es sobreescribir la lista de ciudades 
-				GestionArchivoCSV.crearConcesionario(listaConcesionarios, CSV_CONCESIONARIO);
-				
-			} catch (IOException e) {
-				System.out.println("No se ha podido encontrar el archivo: " + CSV_CONCESIONARIO);
-				LoggerAplicacion.logError(e);
-			}
+			throw new ConcesionarioNoEncontradoException(MensajesError.CONCESIONARIO_NO_ENCONTRADO + codigo);
 		}
+		//La borramos de la lista
+		return GestorJDBC.borrarConcesionario(concesionarioABorrar);
 		
 	}
 
@@ -218,16 +192,11 @@ public class GestorConcesionarios {
 	 * Añadimos un nuevo coche
 	 * 
 	 * @param nuevoCoche
+	 * @throws ErrorConexionJDBC 
 	 */
-	public void crearCocher(Coche nuevoCoche) {
+	public boolean crearCocher(Coche nuevoCoche) throws ErrorConexionJDBC {
 		
-		this.listaCoches.add(nuevoCoche);
-		try {
-			GestionArchivoCSV.crearCoche(listaCoches, CSV_COCHE);
-		} catch (IOException e) {
-			System.out.println("No se ha podido encontrar el archivo: " + CSV_COCHE);
-			LoggerAplicacion.logError(e);
-		}
+		return GestorJDBC.crearCoche(nuevoCoche);
 		
 	}
 

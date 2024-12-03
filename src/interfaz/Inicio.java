@@ -9,6 +9,9 @@ import java.util.Scanner;
 import excepciones.CiudadNoEncontradaException;
 import excepciones.CocheNoEncontradoException;
 import excepciones.ConcesionarioNoEncontradoException;
+import excepciones.ErrorConexionJDBC;
+import excepciones.ErrorInesperado;
+import excepciones.MensajesError;
 import logger.LoggerAplicacion;
 import logica.GestorConcesionarios;
 import modelo.Ciudad;
@@ -29,8 +32,7 @@ public class Inicio {
     * 	
     */
 	private static GestorConcesionarios gestorConcesionarios = new GestorConcesionarios();
-    private static Scanner sc = new Scanner(System.in);
-	
+    private static Scanner sc = new Scanner(System.in);	
     /**
      * 
      * Método de inicio de la aplicación
@@ -39,14 +41,24 @@ public class Inicio {
      */
 	public static void main(String[] args) {
 		iniciarBD();
-		mostrarMenuInicio();
+		try {
+			mostrarMenuInicio();
+		} catch (ErrorConexionJDBC e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		} catch (ErrorInesperado e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		}
 	}
 	/**
 	 * 
 	 * Muestra el menú principal de la aplicación
+	 * @throws ErrorConexionJDBC 
+	 * @throws ErrorInesperado 
 	 * 
 	 */
-	public static void mostrarMenuInicio() {
+	public static void mostrarMenuInicio() throws ErrorConexionJDBC, ErrorInesperado {
 		System.out.println("##########################################");
 		System.out.println("###### BIENVENIDO A ASTURALQUILER.SA #####");
 		System.out.println("##########################################");
@@ -54,12 +66,12 @@ public class Inicio {
 		 
 		do {
 			
-			System.out.println("Accede al menú deseado:  ");
-			System.out.println("1 - Ciudad");
-			System.out.println("2 - Concesionario");
-			System.out.println("3 - Coche");
-			System.out.println("0 - Salir de la aplicación");
-			System.out.println("##########################");
+			System.out.println("Accede al menú deseado:              #");
+			System.out.println("1 - Ciudad                           #");
+			System.out.println("2 - Concesionario                    #");
+			System.out.println("3 - Coche                            #");
+			System.out.println("0 - Salir de la aplicación           #");
+			System.out.println("######################################");
 
 			//Esté método puede arrojar error si el usuario escribe: ex "dfa2"
 			opcion = Integer.parseInt(sc.nextLine());
@@ -97,10 +109,10 @@ public class Inicio {
 		System.out.println("##########################################");	
 		System.out.println("    Selecciona una de las opciones:       ");
 		System.out.println("##########################################");	
-		System.out.println("1 Crear ciudad");
-		System.out.println("2 Leer ciudades");
-		System.out.println("3 Borrar ciudad");
-		System.out.println("0 Salir");
+		System.out.println("1 Crear ciudad                           #");
+		System.out.println("2 Leer ciudades                          #");
+		System.out.println("3 Borrar ciudad                          #");
+		System.out.println("0 Salir al menu principal                #");
 		
 	
 		respuestaUsuario= Integer.parseInt(sc.nextLine());
@@ -177,64 +189,36 @@ public class Inicio {
 	/**
 	 * 
 	 * Mostrar menu Concesionario
+	 * @throws ErrorConexionJDBC 
+	 * @throws ErrorInesperado 
 	 * 
 	 */
-	public static void menuConcesionario() {
+	public static void menuConcesionario() throws ErrorConexionJDBC, ErrorInesperado {
 		int respuestaUsuario;
 		do {
-			
-			System.out.println("Que deseas hacer");
-			System.out.println("1 Crear concesionario");
-			System.out.println("2 Leer concesionarios");
-			System.out.println("3 Actualizar concesionarios");
-			System.out.println("4 Borrar concesionario");
-			System.out.println("0 Salir del menu Concesionario");
+			System.out.println("##########################################");	
+			System.out.println("    Selecciona una de las opciones:       ");
+			System.out.println("##########################################");
+			System.out.println("1 Crear concesionario                    #");
+			System.out.println("2 Leer concesionarios                    #");
+			System.out.println("3 Actualizar concesionarios              #");
+			System.out.println("4 Borrar concesionario                   #");
+			System.out.println("0 Salir al menu principal                #");
 			
 			respuestaUsuario= Integer.parseInt(sc.nextLine());
 			
 			switch (respuestaUsuario) {
 			case 1:
-				System.out.println("Indica el código del concesionario: ");
-				String codigoCoche = sc.nextLine();
-				System.out.println("Indica el nombre del concesionario: ");
-				String nombreConcecionario = sc.nextLine();
-				System.out.println("Indica el codigo de la ciudad: ");
-				String codigoCiudad = sc.nextLine();
-;				Concesionario nuevoConcesionario = new Concesionario(codigoCoche, nombreConcecionario, codigoCiudad);
-				
-				gestorConcesionarios.crearConcesionario(nuevoConcesionario);
-
+				crearConcesionario();
 				break;
 			case 2:
-				List<Concesionario> listaConcesionario = gestorConcesionarios.leerConcesionario();
-				for(Concesionario concesionario : listaConcesionario) {
-					System.out.println(concesionario.toString());
-				}
+				leerConcesionarios();
 				break;
 			case 3:
-				System.out.println("Actualización de concesionarios");
-				System.out.println("Indica el codigo del concesionario: ");
-				String codigoC = sc.nextLine();
-				System.out.println("Indica el nuevo nombre del concesionario");
-				String nombreConcesionario = sc.nextLine();
-				
-				try {
-					gestorConcesionarios.actualizarConcesionario(codigoC, nombreConcesionario);
-				} catch (ConcesionarioNoEncontradoException e) {
-					System.out.println(e.getMessage());
-					LoggerAplicacion.logError(e);
-				}
-				
+				actualizarConcesionario();
 				break;
 			case 4:
-				System.out.println("Indica el código del concesionario a borrar: ");
-				String codigo = sc.nextLine();
-				try {
-					gestorConcesionarios.borrarConcesionario(codigo);
-				} catch (ConcesionarioNoEncontradoException e) {
-					System.out.println(e.getMessage());
-					LoggerAplicacion.logError(e);
-				}
+				borrarConcesionario();
 				break;
 			case 0:
 				System.out.println("Saliendo del menu concesionario");
@@ -246,38 +230,85 @@ public class Inicio {
 		}while(respuestaUsuario != 0);
 	}
 
+	private static void borrarConcesionario() throws ErrorInesperado, ErrorConexionJDBC {
+		System.out.println("Indica el código del concesionario a borrar: ");
+		String codigo = sc.nextLine();
+		try {
+			if (gestorConcesionarios.borrarConcesionario(codigo)) System.out.println("Concesionario borrado correctamente");
+			else throw new ErrorInesperado(MensajesError.ERROR_INESPERADO);
+		} catch (ConcesionarioNoEncontradoException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		}
+	}
+	private static void actualizarConcesionario() throws ErrorConexionJDBC, ErrorInesperado {
+		System.out.println();
+		System.out.println("#### Actualización de concesionarios ####");
+		System.out.print("Indica el codigo del concesionario: ");
+		String codigoC = sc.nextLine();
+		System.out.print("Indica el nuevo nombre del concesionario: ");
+		String nombreConcesionario = sc.nextLine();
+		
+		try {
+			if(gestorConcesionarios.actualizarConcesionario(codigoC, nombreConcesionario)) System.out.println("Concesionario modificado correctamente");
+			else throw new ErrorInesperado(MensajesError.ERROR_INESPERADO);
+		}catch (ConcesionarioNoEncontradoException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		}
+		
+	}
+	private static void leerConcesionarios() {
+		
+		List<Concesionario> listaConcesionario = gestorConcesionarios.leerConcesionarios();
+		if(listaConcesionario.size() == 0) {
+			System.out.println("No ha concesionarios registrados");
+		}else {
+			for(Concesionario concesionario : listaConcesionario) {
+				System.out.println(concesionario.toString());
+			}
+		}
+		
+		
+	}
+	private static void crearConcesionario() throws ErrorInesperado {
+		System.out.println();
+		System.out.print("Indica el código del concesionario: ");
+		String codigoCoche = sc.nextLine();
+		System.out.print("Indica el nombre del concesionario: ");
+		String nombreConcecionario = sc.nextLine();
+		System.out.print("Indica el codigo de la ciudad: ");
+		String codigoCiudad = sc.nextLine();
+;		Concesionario nuevoConcesionario = new Concesionario(codigoCoche, nombreConcecionario, codigoCiudad);
+		
+		if( gestorConcesionarios.crearConcesionario(nuevoConcesionario)) System.out.println("Concesionario creado correctamente");
+		else throw new ErrorInesperado(MensajesError.ERROR_INESPERADO);
+		
+	}
 	/**
 	 * 
 	 * Mostrar menu Coche
+	 * @throws ErrorConexionJDBC 
 	 * 
 	 */
-	private static void menuCoche() {
+	private static void menuCoche() throws ErrorConexionJDBC {
 		int respuestaUsuario;
 		do {
 			
-			System.out.println("Que deseas hacer");
-			System.out.println("1 Crear coche");
-			System.out.println("2 Leer coches");
-			System.out.println("3 Actualizar coche");
-			System.out.println("4 Borrar coche");
-			System.out.println("0 Salir del menu Coche");
+			System.out.println("##########################################");	
+			System.out.println("    Selecciona una de las opciones:       ");
+			System.out.println("##########################################");			
+			System.out.println("1 Crear coche                            #");
+			System.out.println("2 Leer coches                            #");
+			System.out.println("3 Actualizar coche                       #");
+			System.out.println("4 Borrar coche                           #");
+			System.out.println("0 Salir del menu Coche                   #");
 			
 			respuestaUsuario= Integer.parseInt(sc.nextLine());
 			
 			switch (respuestaUsuario) {
 			case 1:
-				System.out.println("Indica la marca: ");
-				String marca = sc.nextLine();
-				System.out.println("Indica el modelo: ");
-				String modelo = sc.nextLine();
-				System.out.println("Indica la matrícula: ");
-				String matrícula = sc.nextLine();
-				System.out.println("Indica su código de concesionario: ");
-				String codigoConcesionario = sc.nextLine();
-				
-				Coche nuevoCoche = new Coche(marca, modelo, matrícula, codigoConcesionario);
-				
-				gestorConcesionarios.crearCocher(nuevoCoche);
+				crearCoche();
 				
 				break;
 			case 2:
@@ -321,6 +352,22 @@ public class Inicio {
 				break;
 			}
 		}while(respuestaUsuario != 0);
+		
+	}
+	private static void crearCoche() throws ErrorConexionJDBC {
+		
+		System.out.println("Indica la marca: ");
+		String marca = sc.nextLine();
+		System.out.println("Indica el modelo: ");
+		String modelo = sc.nextLine();
+		System.out.println("Indica la matrícula: ");
+		String matrícula = sc.nextLine();
+		System.out.println("Indica su código de concesionario: ");
+		String codigoConcesionario = sc.nextLine();
+		
+		Coche nuevoCoche = new Coche(marca, modelo, matrícula, codigoConcesionario);
+		
+		gestorConcesionarios.crearCocher(nuevoCoche);
 		
 	}
 	/**

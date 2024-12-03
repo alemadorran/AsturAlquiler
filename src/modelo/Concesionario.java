@@ -140,8 +140,15 @@ public class Concesionario implements Serializable {
      */
     @Override
     public String toString() {
-        return "Concesionario [codigoConcesionario=" + codigoConcesionario + ", nombre=" + nombre + ", numeroCoches=" 
-                + listaCoche.size() + ", codigoCiudad=" + codigoCiudad + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("=====================================\n");
+        sb.append("Código Concesionario: ").append(codigoConcesionario).append("\n");
+        sb.append("Nombre: ").append(nombre).append("\n");
+        sb.append("Número de Coches: ").append(listaCoche.size()).append("\n");
+        sb.append("Código Ciudad: ").append(codigoCiudad).append("\n");
+        sb.append("=====================================");
+        return sb.toString();
     }
+
 }
 

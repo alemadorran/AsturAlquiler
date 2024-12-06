@@ -11,10 +11,10 @@ import excepciones.ErrorConexionJDBCException;
 import excepciones.MensajesError;
 import logger.LoggerAplicacion;
 import modelo.Concesionario;
-import persistenciaDAO.ConcesionarioDAO;
-import persistenciaDAO.ConexionJDBC;
+import persistencia.ConexionJDBC;
+import persistenciaDAO.IConcesionarioDAO;
 
-public class ConcesionarioDAOimpl implements ConcesionarioDAO{
+public class ConcesionarioDAOimpl implements IConcesionarioDAO{
 
     private static String useDB = "use asturalquiler";
 	
@@ -52,6 +52,7 @@ public class ConcesionarioDAOimpl implements ConcesionarioDAO{
 
 	@Override
 	public List<Concesionario> readAll() {
+		
 	ArrayList<Concesionario> listaConcesionarios = new ArrayList<>(); 
 
 		
@@ -138,7 +139,7 @@ public class ConcesionarioDAOimpl implements ConcesionarioDAO{
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
 			try {
-				throw new ErrorConexionJDBCException(MensajesError.ERROR_CONEXION_BASE_DE_DATOS);
+				throw new ErrorConexionJDBCException(MensajesError.ERROR_EN_BASE_DE_DATOS);
 			} catch (ErrorConexionJDBCException e1) {
 				System.out.println(e1.getMessage());
 				LoggerAplicacion.logError(e1);

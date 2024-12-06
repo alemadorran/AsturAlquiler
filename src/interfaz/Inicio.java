@@ -17,7 +17,7 @@ import logica.GestorConcesionarios;
 import modelo.Ciudad;
 import modelo.Coche;
 import modelo.Concesionario;
-import persistenciaDAO.ConexionJDBC;
+import persistencia.ConexionJDBC;
 
 
 /**
@@ -40,8 +40,13 @@ public class Inicio {
      * @param args
      */
 	public static void main(String[] args) {
-		// A eliminar -> iniciarBD();
-		mostrarMenuInicio();
+		try {
+			iniciarBD();
+			mostrarMenuInicio();
+		}catch (Exception e) {
+			LoggerAplicacion.logError(e);
+			System.out.println(MensajesError.ERROR_INESPERADO);
+		}
 		
 	}
 	/**
@@ -59,16 +64,16 @@ public class Inicio {
 		int opcion;
 		 
 		do {
-			
+			System.out.println("######################################");
 			System.out.println("Accede al menú deseado:              #");
 			System.out.println("1 - Ciudad                           #");
 			System.out.println("2 - Concesionario                    #");
 			System.out.println("3 - Coche                            #");
 			System.out.println("0 - Salir de la aplicación           #");
 			System.out.println("######################################");
+			System.out.println();
 
-			//Esté método puede arrojar error si el usuario escribe: ex "dfa2"
-			opcion = Integer.parseInt(sc.nextLine());
+			opcion = obtenerRespuesta();
 			
 			switch (opcion) {
 			case 1:
@@ -123,8 +128,8 @@ public class Inicio {
 		System.out.println("3 Borrar ciudad                          #");
 		System.out.println("0 Salir al menu principal                #");
 		
-	
-		respuestaUsuario= Integer.parseInt(sc.nextLine());
+		respuestaUsuario = obtenerRespuesta();
+		
 		switch (respuestaUsuario) {
 		case 1:
 			try {
@@ -149,6 +154,7 @@ public class Inicio {
 		}
 		}while(respuestaUsuario != 0);
 	}
+	
 	private static void borrarCiudad() {
 		System.out.println("Indica el código de la ciudad a borrar: ");
 		String codigo = sc.nextLine();
@@ -225,7 +231,7 @@ public class Inicio {
 			System.out.println("4 Borrar concesionario                   #");
 			System.out.println("0 Salir al menu principal                #");
 			
-			respuestaUsuario= Integer.parseInt(sc.nextLine());
+			respuestaUsuario = obtenerRespuesta();
 			
 			switch (respuestaUsuario) {
 			case 1:
@@ -312,6 +318,11 @@ public class Inicio {
 		else throw new ErrorInesperadoException(MensajesError.ERROR_INESPERADO);
 		
 	}
+	
+	//############################################################################################### 
+	//###################################  MENU COCHE   #############################################
+	//############################################################################################### 
+	
 	/**
 	 * 
 	 * Mostrar menu Coche
@@ -327,49 +338,28 @@ public class Inicio {
 			System.out.println("##########################################");			
 			System.out.println("1 Crear coche                            #");
 			System.out.println("2 Leer coches                            #");
-			System.out.println("3 Actualizar coche                       #");
-			System.out.println("4 Borrar coche                           #");
+			System.out.println("3 Leer un coche                          #");
+			System.out.println("4 Actualizar coche                       #");
+			System.out.println("5 Borrar coche                           #");
 			System.out.println("0 Salir del menu Coche                   #");
 			
-			respuestaUsuario= Integer.parseInt(sc.nextLine());
+			respuestaUsuario= obtenerRespuesta();
 			
 			switch (respuestaUsuario) {
 			case 1:
 				crearCoche();
-				
 				break;
 			case 2:
-				List<Coche> listaCoches = new ArrayList<Coche>();
-				listaCoches = gestorConcesionarios.leerCoches();
-				
-				for(Coche coche: listaCoches) {
-					System.out.println(coche.toString());
-				}
-				
-				break;
-			case 3:
-				System.out.println("Actualización de coche");
-				System.out.println("Indicamos la matricula del coche: ");
-				String matriculaCoche = sc.nextLine();
-				System.out.println("Indica el nuevo código de concesionario: ");
-				String codigoConces = sc.nextLine();
-				try {
-					gestorConcesionarios.actualizarCoche(matriculaCoche, codigoConces);
-				} catch (CocheNoEncontradoException e) {
-					System.out.println(e.getMessage());
-					LoggerAplicacion.logError(e);
-				}
-				
+				leerCoches();
+				break;	
+			case 3: 
+				leerCoche();
 				break;
 			case 4:
-				System.out.println("Indica la matricula del coche a borrar: ");
-				String matricula = sc.nextLine();
-				try {
-					gestorConcesionarios.borrarCoche(matricula);
-				} catch (CocheNoEncontradoException e) {
-					System.out.println(e.getMessage());
-					LoggerAplicacion.logError(e);
-				}
+				actualizarCoche();
+				break;
+			case 5:
+				borrarCoche();
 				break;
 			case 0:
 				System.out.println("Saliendo del menu coche");
@@ -381,20 +371,70 @@ public class Inicio {
 		}while(respuestaUsuario != 0);
 		
 	}
-	private static void crearCoche() throws ErrorConexionJDBCException {
+	private static void borrarCoche() {
+		System.out.println("###########  BORRADO DE COCHE ###########");
+		System.out.println("Indica la matricula del coche a borrar: ");
+		String matricula = sc.nextLine();
+		try {
+			gestorConcesionarios.borrarCoche(matricula);
+		} catch (CocheNoEncontradoException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		}
+	}
+	private static void actualizarCoche() {
+		System.out.println("###########  ACTUALIZACIÓN DE COCHE ###########");
+		System.out.print("Indicamos la matricula del coche: ");
+		String matriculaCoche = sc.nextLine();
+		System.out.print("Indica el nuevo código de concesionario: ");
+		String codigoConces = sc.nextLine();
+		try {
+			gestorConcesionarios.actualizarCoche(matriculaCoche, codigoConces);
+		} catch (CocheNoEncontradoException | DatosObligatoriosNoPresentesException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		} 
+	}
+	private static void leerCoche() {
+		String matricula = "";
+		System.out.print("Introduce la matrícula del coche a buscar: ");
+		matricula = sc.nextLine();
+		try {
+			gestorConcesionarios.leerCoche(matricula);
+		} catch (DatosObligatoriosNoPresentesException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		}
 		
+	}
+	private static void leerCoches() {
+		List<Coche> listaCoches = new ArrayList<Coche>();
+		listaCoches = gestorConcesionarios.leerCoches();
+		
+		for(Coche coche: listaCoches) {
+			System.out.println(coche.toString());
+		}
+		
+	}
+	private static void crearCoche() throws ErrorConexionJDBCException {
+
+		System.out.println("Indica la matrícula: ");
+		String matricula = sc.nextLine();
 		System.out.println("Indica la marca: ");
 		String marca = sc.nextLine();
 		System.out.println("Indica el modelo: ");
 		String modelo = sc.nextLine();
-		System.out.println("Indica la matrícula: ");
-		String matrícula = sc.nextLine();
 		System.out.println("Indica su código de concesionario: ");
 		String codigoConcesionario = sc.nextLine();
 		
-		Coche nuevoCoche = new Coche(marca, modelo, matrícula, codigoConcesionario);
+		Coche nuevoCoche = new Coche(matricula, marca, modelo, codigoConcesionario);
 		
-		gestorConcesionarios.crearCocher(nuevoCoche);
+		try {
+			gestorConcesionarios.crearCoche(nuevoCoche);
+		} catch (DatosObligatoriosNoPresentesException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		}
 		
 	}
 	
@@ -410,6 +450,21 @@ public class Inicio {
 			conexionJDBC.closeConnection();
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
+		}catch (NullPointerException e1) {
+			LoggerAplicacion.logError(e1);
+			System.out.println(MensajesError.BASE_DATOS_NO_CREADA);
+		}catch (Exception e2) {
+			LoggerAplicacion.logError(e2);
+			System.out.println(MensajesError.BASE_DATOS_NO_CREADA);
 		}
+	}
+	
+	private static int obtenerRespuesta() {
+		try {
+			return Integer.parseInt(sc.nextLine());
+		}catch (Exception e) {
+			System.out.println(MensajesError.FORMATO_NUMERO_INCORRECTO);
+		}
+		return -1;
 	}
 }

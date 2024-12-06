@@ -9,10 +9,10 @@ import java.util.List;
 
 import logger.LoggerAplicacion;
 import modelo.Ciudad;
-import persistenciaDAO.CiudadDAO;
-import persistenciaDAO.ConexionJDBC;
+import persistencia.ConexionJDBC;
+import persistenciaDAO.ICiudadDAO;
 
-public class CiudadDAOimpl implements CiudadDAO{
+public class CiudadDAOimpl implements ICiudadDAO{
 
     private static String useDB = "use asturalquiler";
 	

@@ -4,7 +4,7 @@ import java.util.List;
 
 import modelo.Ciudad;
 
-public interface CiudadDAO {
+public interface ICiudadDAO {
 
 	boolean create(Ciudad ciudad);
 	

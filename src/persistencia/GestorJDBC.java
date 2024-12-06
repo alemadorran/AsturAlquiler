@@ -13,7 +13,6 @@ import logger.LoggerAplicacion;
 import modelo.Ciudad;
 import modelo.Coche;
 import modelo.Concesionario;
-import persistenciaDAO.ConexionJDBC;
 
 public class GestorJDBC {
 	
@@ -212,7 +211,7 @@ public class GestorJDBC {
 			
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
-			throw new ErrorConexionJDBCException(MensajesError.ERROR_CONEXION_BASE_DE_DATOS);
+			throw new ErrorConexionJDBCException(MensajesError.ERROR_EN_BASE_DE_DATOS);
 		}finally {
 			conexionJDBC.closeConnection();
 		}
@@ -238,7 +237,7 @@ public class GestorJDBC {
 			}
 		} catch (SQLException e) {
 			LoggerAplicacion.logError(e);
-			throw new ErrorConexionJDBCException(MensajesError.ERROR_CONEXION_BASE_DE_DATOS);
+			throw new ErrorConexionJDBCException(MensajesError.ERROR_EN_BASE_DE_DATOS);
 		}finally {
 			conexionJDBC.closeConnection();
 		}

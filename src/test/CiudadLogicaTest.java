@@ -14,14 +14,14 @@ import excepciones.DatosObligatoriosNoPresentesException;
 import logger.LoggerAplicacion;
 import logica.GestorConcesionarios;
 import modelo.Ciudad;
-import persistenciaDAO.CiudadDAO;
+import persistenciaDAO.ICiudadDAO;
 import persistenciaDAO.impl.CiudadDAOimpl;
 
 public class CiudadLogicaTest {
 	
 	GestorConcesionarios gestor = new GestorConcesionarios();
 	
-	public static CiudadDAO ciudadDAO;
+	public static ICiudadDAO ciudadDAO;
 	
 	public CiudadLogicaTest() {
 		ciudadDAO = new CiudadDAOimpl();
@@ -42,16 +42,13 @@ public class CiudadLogicaTest {
 		assertTrue(ciudadCreada);
 		
 		//Limpiamos base de datos
-		try {
-			gestor.borrarCiudad(ciudad);
-		} catch (CiudadNoEncontradaException e) {
-			LoggerAplicacion.logError(e);
-		}
+		ciudadDAO.detele(ciudad);
 		
 	}
 	
 	@Test
 	public void crearCiudadErrorCodigoVacio() {
+		
 		Ciudad ciudad = new Ciudad("","Bilbao");
 		
 		assertThrows(DatosObligatoriosNoPresentesException.class, () -> {
@@ -80,12 +77,14 @@ public class CiudadLogicaTest {
 		List<Ciudad>ciudades = gestor.leerCiudades();		
 		
 		assertTrue(((ArrayList<Ciudad>)ciudades).size() >= 1);
+		
 		//Limpiamos base de datos
-		try {
-			gestor.borrarCiudad(ciudad);
-		} catch (CiudadNoEncontradaException e) {
-			LoggerAplicacion.logError(e);
-		}
+		ciudadDAO.detele(ciudad);
+	}
+	
+	@Test
+	public void leerCiudadOKTest() {
+		//TODO
 	}
 	
 	@Test
@@ -115,10 +114,10 @@ public class CiudadLogicaTest {
 		String codigoCiudadVacio = "";
 		
 		assertThrows(CiudadNoEncontradaException.class, () -> {
-			gestor.borrarCiudad(codigoCiudadInexistente);
+			gestor.borrarCiudad(new Ciudad(codigoCiudadInexistente, "Sevilla"));
 		});
 		assertThrows(CiudadNoEncontradaException.class, () -> {
-			gestor.borrarCiudad(codigoCiudadVacio);
+			gestor.borrarCiudad(new Ciudad(codigoCiudadVacio, "Málaga"));
 		});
 		
 		

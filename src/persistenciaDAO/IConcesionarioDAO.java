@@ -5,7 +5,7 @@ import java.util.List;
 import modelo.Ciudad;
 import modelo.Concesionario;
 
-public interface ConcesionarioDAO {
+public interface IConcesionarioDAO {
 	
 	boolean create(Concesionario concesionario);
 	

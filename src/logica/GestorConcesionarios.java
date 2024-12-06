@@ -19,8 +19,12 @@ import modelo.Coche;
 import modelo.Concesionario;
 import persistencia.GestionArchivoCSV;
 import persistencia.GestorJDBC;
-import persistenciaDAO.CiudadDAO;
+import persistenciaDAO.ICiudadDAO;
+import persistenciaDAO.ICocheDAO;
+import persistenciaDAO.IConcesionarioDAO;
 import persistenciaDAO.impl.CiudadDAOimpl;
+import persistenciaDAO.impl.CocheDAOimpl;
+import persistenciaDAO.impl.ConcesionarioDAOimpl;
 
 /**
  * 
@@ -39,7 +43,9 @@ public class GestorConcesionarios {
 	String CSV_CIUDAD = "";
 	String CSV_COCHE = "";
 	
-	private static CiudadDAO ciudadDAO;
+	private static ICiudadDAO ciudadDAO;
+	private static IConcesionarioDAO concesionarioDAO;
+	private static ICocheDAO cocheDAO;
 	
     /**
      * 
@@ -52,6 +58,8 @@ public class GestorConcesionarios {
 		listaCoches = new ArrayList<>();
 		
 		ciudadDAO = new CiudadDAOimpl();
+		concesionarioDAO = new ConcesionarioDAOimpl();
+		cocheDAO = new CocheDAOimpl();
 	}
 	/**
 	 * 
@@ -78,6 +86,16 @@ public class GestorConcesionarios {
 	public List<Ciudad> leerCiudades() {
 		
 		List<Ciudad> listaCiudades = ciudadDAO.readAll();
+		List <Concesionario> listaConcesionario = concesionarioDAO.readAll();
+		
+		for(Ciudad ciudad: listaCiudades) {
+			for (Concesionario concesionario : listaConcesionario) {
+				if(concesionario.getCodigoCiudad().equals(ciudad.getCodigo())){
+					ciudad.getListaConcesionarios().add(concesionario);
+				}
+			}	
+		}
+		
 		return listaCiudades;
 		
 	}
@@ -115,7 +133,7 @@ public class GestorConcesionarios {
 			veriricaParametro(nuevoConcesionario.getNombre(), "nombre concesionario");
 		}
 		
-		return GestorJDBC.crearConcesionario(nuevoConcesionario);
+		return concesionarioDAO.create(nuevoConcesionario);
 		
 	}
 
@@ -127,10 +145,19 @@ public class GestorConcesionarios {
 	 */
 	public List<Concesionario> leerConcesionarios() {
 
-		List<Concesionario> listaconcesionario = null; 
 		
-		listaconcesionario = GestorJDBC.leerConcesionarios();
-		
+		 List<Concesionario> listaconcesionario = concesionarioDAO.readAll();
+		 List<Coche> listaCoches = cocheDAO.readAll();
+		 
+		 for(Concesionario concesionario : listaconcesionario) {
+
+			 for (Coche coche : listaCoches) {
+				if(coche.getCodigoConcesionario().equals(concesionario.getCodigoConcesionario())) {
+					concesionario.getListaCoche().add(coche);
+				}
+			}
+			 
+		 }
 		return listaconcesionario;
 
 	}
@@ -150,7 +177,7 @@ public class GestorConcesionarios {
 	
 		Concesionario concesionarioAActualizar = null; 
 		
-		ArrayList<Concesionario> listaConcesionarios = GestorJDBC.leerConcesionarios(); 
+		ArrayList<Concesionario> listaConcesionarios = (ArrayList<Concesionario>) concesionarioDAO.readAll(); 
 		
 		//Buscamos el concesionario con el mismo código
 		for(Concesionario concesionario : listaConcesionarios) {
@@ -166,12 +193,7 @@ public class GestorConcesionarios {
 			//Modificamos nombre del concesionario
 			concesionarioAActualizar.setNombre(nombreConcecionario);
 			
-			try {
-				return GestorJDBC.actualizarConcesionario(concesionarioAActualizar);
-			} catch (ErrorConexionJDBCException e) {
-				LoggerAplicacion.logError(e);
-				return false;
-			}
+			return concesionarioDAO.update(concesionarioAActualizar);
 			
 		}
 		
@@ -190,7 +212,7 @@ public class GestorConcesionarios {
 		
 		Concesionario concesionarioABorrar = null;
 		
-		ArrayList<Concesionario> listaConcesionarios = GestorJDBC.leerConcesionarios();
+		ArrayList<Concesionario> listaConcesionarios = (ArrayList<Concesionario>) concesionarioDAO.readAll();
 		
 		for(Concesionario concesionario: listaConcesionarios) {
 			
@@ -203,13 +225,7 @@ public class GestorConcesionarios {
 		if(concesionarioABorrar == null) {
 			throw new ConcesionarioNoEncontradoException(MensajesError.CONCESIONARIO_NO_ENCONTRADO + codigo);
 		}
-		//La borramos de la lista
-		try {
-			return GestorJDBC.borrarConcesionario(concesionarioABorrar);
-		} catch (ErrorConexionJDBCException e) {
-			LoggerAplicacion.logError(e);
-			return false;
-		}
+		return concesionarioDAO.detele(concesionarioABorrar);
 		
 	}
 
@@ -218,11 +234,15 @@ public class GestorConcesionarios {
 	 * Añadimos un nuevo coche
 	 * 
 	 * @param nuevoCoche
+	 * @throws DatosObligatoriosNoPresentesException 
 	 * @throws ErrorConexionJDBCException 
 	 */
-	public boolean crearCocher(Coche nuevoCoche) throws ErrorConexionJDBCException {
+	public boolean crearCoche(Coche nuevoCoche) throws DatosObligatoriosNoPresentesException{
 		
-		return GestorJDBC.crearCoche(nuevoCoche);
+		veriricaParametro(nuevoCoche.getMatricula(), "matrícula");
+		veriricaParametro(nuevoCoche.getCodigoConcesionario(), "código concesionario");
+		
+		return cocheDAO.create(nuevoCoche);
 		
 	}
 
@@ -235,14 +255,26 @@ public class GestorConcesionarios {
 	public List<Coche> leerCoches() {
 		
 		List<Coche> listaCoches = null;
-		try {
-			this.listaCoches = GestionArchivoCSV.leerCoches(CSV_COCHE);
-		} catch (IOException e) {
-			System.out.println("No se ha podido encontrar el archivo: " + CSV_COCHE);
-			LoggerAplicacion.logError(e);
-		}
-		listaCoches = this.listaCoches;
-		return listaCoches;
+		
+		listaCoches = cocheDAO.readAll();
+		
+	    return listaCoches;
+	}
+	
+	/**
+	 * 
+	 * Recuperamos un coche por su matrícula
+	 * 
+	 * @return
+	 * @throws DatosObligatoriosNoPresentesException 
+	 */
+	public Coche leerCoche(String matricula) throws DatosObligatoriosNoPresentesException {
+		
+		veriricaParametro(matricula, "matrícula");
+	
+		Coche coche = cocheDAO.read(matricula);
+		
+		return coche;
 	}
 
 	/**
@@ -252,20 +284,21 @@ public class GestorConcesionarios {
 	 * @param matriculaCoche
 	 * @param codigoConces
 	 * @throws CocheNoEncontradoException 
+	 * @throws DatosObligatoriosNoPresentesException 
 	 */
-	public void actualizarCoche(String matriculaCoche, String codigoConces) throws CocheNoEncontradoException {
+	public boolean actualizarCoche(String matriculaCoche, String codigoConces) throws CocheNoEncontradoException, DatosObligatoriosNoPresentesException {
+		
+		veriricaParametro(matriculaCoche, "matricula");
+		veriricaParametro(codigoConces, "codigo concesionario");
+
+		
 		//Sincronizar lista en memoria con la persistencia
-		try {
-			this.listaCoches = GestionArchivoCSV.leerCoches(CSV_COCHE);
-		} catch (IOException e) {
-			System.out.println("No se ha podido encontrar el archivo: " + CSV_COCHE);
-			LoggerAplicacion.logError(e);
-		}
+		List <Coche> listaCoches = cocheDAO.readAll();
 		
 		Coche cocheAActualizar = null; 
 		
 		//Vamos a encontrar el coche a actualizar
-		for(Coche coche: this.listaCoches) {
+		for(Coche coche: listaCoches) {
 			if(coche.getMatricula().equals(matriculaCoche)) {
 				cocheAActualizar = coche;
 			}
@@ -280,14 +313,8 @@ public class GestorConcesionarios {
 			//Actualizar con el nuevo código concesionario
 			cocheAActualizar.setCodigoConcesionario(codigoConces);
 			
-			try {
-				//Sincronizamos el archivo CSV 
-				GestionArchivoCSV.crearCoche(this.listaCoches, CSV_COCHE);
-			} catch (IOException e) {
-				System.out.println("No se ha podido encontrar el archivo: " + CSV_COCHE);
-				LoggerAplicacion.logError(e);
-
-			}
+			return cocheDAO.update(cocheAActualizar);
+			
 		}
 		
 	}
@@ -299,19 +326,15 @@ public class GestorConcesionarios {
 	 * @param matricula
 	 * @throws CocheNoEncontradoException 
 	 */
-	public void borrarCoche(String matricula) throws CocheNoEncontradoException {
+	public boolean borrarCoche(String matricula) throws CocheNoEncontradoException {
 		
 		//Sincronizar lista en memoria con la persistencia
-		try {
-			this.listaCoches = GestionArchivoCSV.leerCoches(CSV_COCHE);
-		} catch (IOException e) {
-					e.printStackTrace();
-		}
+		List<Coche> listaCoches = cocheDAO.readAll();
 				
 		Coche cocheABorrar = null; 
 				
 		//Vamos a encontrar el coche a actualizar
-		for(Coche coche: this.listaCoches) {
+		for(Coche coche: listaCoches) {
 			if(coche.getMatricula().equals(matricula)) {
 				cocheABorrar = coche;
 			}
@@ -321,15 +344,7 @@ public class GestorConcesionarios {
 			throw new CocheNoEncontradoException("Matricula " + matricula + " no encontrada.");
 		}else {
 			//Borramos el objeto en la lista en memoria
-			this.listaCoches.remove(cocheABorrar);
-			try {
-				//Sincronizamos el archivo CSV 
-				GestionArchivoCSV.crearCoche(this.listaCoches, CSV_COCHE);
-			} catch (IOException e) {
-				System.out.println("No se ha podido encontrar el archivo: " + CSV_COCHE);
-				LoggerAplicacion.logError(e);
-			}
-
+			return cocheDAO.detele(cocheABorrar);
 		}
 		
 	}

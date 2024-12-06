@@ -8,7 +8,11 @@ import java.io.Serializable;
  * 
  */
 public class Coche implements Serializable {
-    
+
+    /**
+     * Matrícula única del coche. Es la clave primaria.
+     */
+    private String matricula;
     /**
      * Marca del coche.
      */
@@ -18,11 +22,6 @@ public class Coche implements Serializable {
      * Modelo del coche.
      */
     private String modelo;
-
-    /**
-     * Matrícula única del coche. Es la clave primaria.
-     */
-    private String matricula;
 
     /**
      * Código del concesionario asociado al coche.
@@ -38,7 +37,7 @@ public class Coche implements Serializable {
      * @param matricula la matrícula única del coche.
      * @param codigoConcesionario el código del concesionario asociado al coche.
      */
-    public Coche(String marca, String modelo, String matricula, String codigoConcesionario) {
+    public Coche(String matricula, String marca, String modelo, String codigoConcesionario) {
         this.marca = marca;
         this.modelo = modelo;
         this.matricula = matricula;

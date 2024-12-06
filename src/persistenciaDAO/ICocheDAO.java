@@ -5,11 +5,11 @@ import java.util.List;
 import modelo.Coche;
 import modelo.Concesionario;
 
-public interface CocheDAO {
+public interface ICocheDAO {
 	
 	boolean create(Coche coche);
 	
-	Concesionario read();
+	Coche read(String matricula);
 	
 	List<Coche> readAll();
 	

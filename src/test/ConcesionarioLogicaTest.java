@@ -17,18 +17,27 @@ import excepciones.ErrorConexionJDBCException;
 import logica.GestorConcesionarios;
 import modelo.Ciudad;
 import modelo.Concesionario;
+import persistenciaDAO.ICiudadDAO;
+import persistenciaDAO.impl.CiudadDAOimpl;
 
 public class ConcesionarioLogicaTest {
 	
-	GestorConcesionarios gestor = new GestorConcesionarios();
+	public static GestorConcesionarios gestor;
+	
+	public static ICiudadDAO ciudadDAO;
+	
+	public ConcesionarioLogicaTest() {
+		ciudadDAO = new CiudadDAOimpl();
+		gestor = new GestorConcesionarios();
+	}
 	
 	@Test
 	public void crearConcesionarioOKTest() throws DatosObligatoriosNoPresentesException, CiudadNoEncontradaException, ErrorConexionJDBCException, ConcesionarioNoEncontradoException {
 		
 		final String CODIGO_CIUDAD = "BB45";
+		final String NOMBRE_CIUDAD = "Santander";
 		
-		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
-		
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		
 		Concesionario concesionario = new Concesionario(
 				"31231",
@@ -39,10 +48,8 @@ public class ConcesionarioLogicaTest {
 		
 		assertTrue(concesionarioCreado);
 		
-		
-		//Limpiamos base de datos
-		gestor.borrarConcesionario(concesionario.getCodigoConcesionario());
-		gestor.borrarCiudad(CODIGO_CIUDAD);	
+		//Limpiamos base de datos (Al borrar la ciudad se borrará el concesionario dado que está en ON DETELE CASCADE)
+		ciudadDAO.detele(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 	}
 	
 	@Test
@@ -64,8 +71,9 @@ public class ConcesionarioLogicaTest {
 	public void crearConcesionarioParametrosVaciosTest() throws DatosObligatoriosNoPresentesException, ErrorConexionJDBCException, ConcesionarioNoEncontradoException, CiudadNoEncontradaException {
 		
 		final String CODIGO_CIUDAD = "LL89";
-		
-		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
+		final String NOMBRE_CIUDAD = "Santander";
+
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		
 		Concesionario concesionarioSinCodigo = new Concesionario(
 				"",
@@ -85,8 +93,8 @@ public class ConcesionarioLogicaTest {
 			gestor.crearConcesionario(concesionarioSinNombre);
 		});
 		
-		//Limpiamos base de datos
-		gestor.borrarCiudad(CODIGO_CIUDAD);	
+		//Limpiamos base de datos (Al borrar la ciudad se borrará el concesionario dado que está en ON DETELE CASCADE)
+		ciudadDAO.detele(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		
 	}
 	
@@ -95,7 +103,8 @@ public class ConcesionarioLogicaTest {
 		
 		final String CODIGO_CONCESIONARIO = "RT124";
 		final String CODIGO_CIUDAD = "78JDL";
-		
+		final String NOMBRE_CIUDAD = "Santander";
+
 		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
 		
 		gestor.crearConcesionario( new Concesionario(
@@ -106,9 +115,15 @@ public class ConcesionarioLogicaTest {
 		ArrayList<Concesionario> listaConcesionarios = (ArrayList<Concesionario>) gestor.leerConcesionarios();
 		
 		assertTrue(listaConcesionarios.size() >= 1);
-		//Limpiamos base de datos
-		gestor.borrarCiudad(CODIGO_CIUDAD);
 		
+		//Limpiamos base de datos (Al borrar la ciudad se borrará el concesionario dado que está en ON DETELE CASCADE)
+		ciudadDAO.detele(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
+		
+	}
+	
+	@Test
+	public void leerConcesionarioOkTest() {
+		//TODO
 	}
 	
 	@Test
@@ -116,8 +131,10 @@ public class ConcesionarioLogicaTest {
 		
 		final String CODIGO_CONCESIONARIO = "UIO48";
 		final String CODIGO_CIUDAD = "098UJA";
+		final String NOMBRE_CIUDAD = "Santander";
+
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		
-		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
 		gestor.crearConcesionario( new Concesionario(
 				CODIGO_CONCESIONARIO,
 				"AutosMadrid",
@@ -141,8 +158,8 @@ public class ConcesionarioLogicaTest {
 		assertNotNull(cActualizado);
 		assertEquals(nuevoNombreConcesionario, cActualizado.getNombre());
 		
-		//Limpiamos base de datos 
-		gestor.borrarConcesionario(CODIGO_CONCESIONARIO);
+		//Limpiamos base de datos (Al borrar la ciudad se borrará el concesionario dado que está en ON DETELE CASCADE)
+		ciudadDAO.detele(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		
 	}
 	
@@ -151,16 +168,23 @@ public class ConcesionarioLogicaTest {
 		
 		final String CODIGO_CONCESIONARIO = "872YU";
 		final String CODIGO_CIUDAD = "227HIM";
-		
-		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
+		final String NOMBRE_CIUDAD = "Santander";
+
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		gestor.crearConcesionario( new Concesionario(
 				CODIGO_CONCESIONARIO,
 				"AutosMadrid",
 				CODIGO_CIUDAD));
 		
-		String nuevoNombreConcesionario = "";
+		String nuevoNombreConcesionario = "AutosRenovadosMadrid";
+		String codigoConcesionarioVacio = "";
+				
+		assertThrows(DatosObligatoriosNoPresentesException.class, () -> {
+			gestor.actualizarConcesionario(codigoConcesionarioVacio, nuevoNombreConcesionario);
+		});
 		
-		//boolean concesionarioActualizado = gestor.actualizarConcesionario(CODIGO_CONCESIONARIO, nuevoNombreConcesionario);
+		//Limpiamos base de datos (Al borrar la ciudad se borrará el concesionario dado que está en ON DETELE CASCADE)
+		ciudadDAO.detele(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 
 	}
 	

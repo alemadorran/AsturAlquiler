@@ -1,4 +1,4 @@
-package persistenciaDAO;
+package persistencia;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import excepciones.MensajesError;
 import logger.LoggerAplicacion;
 
 import java.io.File;
@@ -31,7 +32,7 @@ public class ConexionJDBC {
      * 
      * @return La instancia única de `ConexionJDBC`.
      */
-    public static ConexionJDBC instace()throws SQLException {
+    public static ConexionJDBC instace()throws SQLException, NullPointerException{
     	
     	if(conexionJDBC == null || conexionJDBC.getConnection().isClosed()) {
     		conexionJDBC = new ConexionJDBC();
@@ -51,7 +52,7 @@ public class ConexionJDBC {
         try {
         	Class.forName("com.mysql.cj.jdbc.Driver");
             this.conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/asturalquiler",
-            		"root", "root");
+            		"root", "1234");
         } catch (ClassNotFoundException e) {
 			 LoggerAplicacion.logError(e);
 		} catch (SQLException e) {
@@ -92,9 +93,12 @@ public class ConexionJDBC {
     public void closeConnection() {
 		try {
 			conn.close();
-		} catch (Exception e) {
-			System.err.println("Error al cerrar la conexión");
-			System.out.println(e.toString());
+		} catch (NullPointerException e1) {
+			LoggerAplicacion.logError(e1);
+			System.out.println(MensajesError.BASE_DATOS_NO_CREADA);
+		}catch (Exception e) {
+			LoggerAplicacion.logError(e);
+			System.out.println(MensajesError.ERROR_INESPERADO);
 		}
 	}
 }

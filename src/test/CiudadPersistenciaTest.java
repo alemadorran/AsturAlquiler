@@ -12,19 +12,28 @@ import excepciones.DatosObligatoriosNoPresentesException;
 import logger.LoggerAplicacion;
 import modelo.Ciudad;
 import persistencia.GestorJDBC;
+import persistenciaDAO.ICiudadDAO;
+import persistenciaDAO.impl.CiudadDAOimpl;
 
 public class CiudadPersistenciaTest {
+	
+	public static ICiudadDAO ciudadDAO;
+	
+	public CiudadPersistenciaTest() {
+		ciudadDAO = new CiudadDAOimpl();
+	}
 	
 	@Test
 	public void crearCiudadOk() {
 		
 		Ciudad ciudad = new Ciudad("323","Bilbao");
 		boolean ciudadCreada = false;
-		ciudadCreada = GestorJDBC.crearCiudad(ciudad);
+		ciudadCreada = ciudadDAO.create(ciudad);
 		
 		assertTrue(ciudadCreada);
 		
-		GestorJDBC.borrarCiudad(ciudad.getCodigo());
+		//Limpiamos base de datos
+		ciudadDAO.detele(ciudad);
 		
 	}
 	
@@ -32,29 +41,34 @@ public class CiudadPersistenciaTest {
 	public void crearCiudadErrorCodigoYaExistente() {
 		
 		Ciudad ciudad = new Ciudad("443","Bilbao");
-		GestorJDBC.crearCiudad(ciudad);
+		ciudadDAO.create(ciudad);
 		
 		Ciudad ciudad2 = new Ciudad("443","Sevilla");
 		
-		boolean ciudadCreada = GestorJDBC.crearCiudad(ciudad2);
+		boolean ciudadCreada = ciudadDAO.create(ciudad2);
 		assertFalse(ciudadCreada);
 		
 		//Limpiamos base de datos
-		GestorJDBC.borrarCiudad(ciudad.getCodigo());
+		ciudadDAO.detele(ciudad);
 	}
 	
 	@Test 
 	public void leerCiudadesOk(){
 		
 		Ciudad ciudad = new Ciudad("2324","Bilbao");
-		GestorJDBC.crearCiudad(ciudad);
+		ciudadDAO.create(ciudad);
 		
-		List<Ciudad>ciudades = GestorJDBC.leerCiudades();		
+		List<Ciudad>ciudades = ciudadDAO.readAll();		
 		
 		assertTrue(((ArrayList<Ciudad>)ciudades).size() >= 1);
 		
 		//Limpiamos base de datos
-		GestorJDBC.borrarCiudad(ciudad.getCodigo());
+		ciudadDAO.detele(ciudad);
+	}
+	
+	@Test
+	public void leerCiudadOKTest() {
+		//TODO
 	}
 	
 	@Test
@@ -63,12 +77,11 @@ public class CiudadPersistenciaTest {
 		Ciudad ciudad = new Ciudad("23232","Bilbao");
 		
 		
-		GestorJDBC.crearCiudad(ciudad);
+		ciudadDAO.create(ciudad);
 		
 		boolean ciudadBorrada = false;
 		
-		ciudadBorrada = GestorJDBC.borrarCiudad(ciudad.getCodigo());
-		
+		ciudadBorrada = ciudadDAO.detele(ciudad);
 		
 		assertTrue(ciudadBorrada);
 	}
@@ -79,8 +92,8 @@ public class CiudadPersistenciaTest {
 		String codigoCiudadInexistente = "999999999999";
 		String codigoCiudadVacio = "";
 		
-		assertFalse(GestorJDBC.borrarCiudad(codigoCiudadInexistente));
-		assertFalse(GestorJDBC.borrarCiudad(codigoCiudadVacio));
+		assertFalse(ciudadDAO.detele(new Ciudad (codigoCiudadInexistente, "Sevilla")));
+		assertFalse(ciudadDAO.detele(new Ciudad (codigoCiudadVacio, "Sevilla")));
 
 		
 	}

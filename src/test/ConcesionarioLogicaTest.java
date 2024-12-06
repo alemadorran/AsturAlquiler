@@ -26,6 +26,9 @@ public class ConcesionarioLogicaTest {
 	
 	public static ICiudadDAO ciudadDAO;
 	
+	private final String CODIGO_CIUDAD = "BB45";
+	private final String NOMBRE_CIUDAD = "Santander";
+	
 	public ConcesionarioLogicaTest() {
 		ciudadDAO = new CiudadDAOimpl();
 		gestor = new GestorConcesionarios();
@@ -33,9 +36,6 @@ public class ConcesionarioLogicaTest {
 	
 	@Test
 	public void crearConcesionarioOKTest() throws DatosObligatoriosNoPresentesException, CiudadNoEncontradaException, ErrorConexionJDBCException, ConcesionarioNoEncontradoException {
-		
-		final String CODIGO_CIUDAD = "BB45";
-		final String NOMBRE_CIUDAD = "Santander";
 		
 		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		
@@ -54,9 +54,7 @@ public class ConcesionarioLogicaTest {
 	
 	@Test
 	public void crearConcesionarioCiudadNoExistenteErrorTest() throws DatosObligatoriosNoPresentesException {
-		
-		final String CODIGO_CIUDAD = "XX78";
-		
+				
 		Concesionario concesionario = new Concesionario(
 				"31231",
 				"AutosMadrid",
@@ -69,10 +67,7 @@ public class ConcesionarioLogicaTest {
 	
 	@Test
 	public void crearConcesionarioParametrosVaciosTest() throws DatosObligatoriosNoPresentesException, ErrorConexionJDBCException, ConcesionarioNoEncontradoException, CiudadNoEncontradaException {
-		
-		final String CODIGO_CIUDAD = "LL89";
-		final String NOMBRE_CIUDAD = "Santander";
-
+	
 		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		
 		Concesionario concesionarioSinCodigo = new Concesionario(
@@ -102,8 +97,6 @@ public class ConcesionarioLogicaTest {
 	public void leerConcesionariosOkTest() throws DatosObligatoriosNoPresentesException, CiudadNoEncontradaException{
 		
 		final String CODIGO_CONCESIONARIO = "RT124";
-		final String CODIGO_CIUDAD = "78JDL";
-		final String NOMBRE_CIUDAD = "Santander";
 
 		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
 		
@@ -122,16 +115,21 @@ public class ConcesionarioLogicaTest {
 	}
 	
 	@Test
-	public void leerConcesionarioOkTest() {
-		//TODO
+	public void leerConcesionarioOkTest() throws DatosObligatoriosNoPresentesException {
+
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
+		gestor.crearConcesionario(new Concesionario("78J", "Autos Madrid", CODIGO_CIUDAD));
+		
+		Concesionario concesionario = gestor.leerConcesionario("78J");
+		
+		assertNotNull(concesionario);
+		
 	}
 	
 	@Test
 	public void actualizarConcesionariosOKTest() throws DatosObligatoriosNoPresentesException, ConcesionarioNoEncontradoException {
 		
 		final String CODIGO_CONCESIONARIO = "UIO48";
-		final String CODIGO_CIUDAD = "098UJA";
-		final String NOMBRE_CIUDAD = "Santander";
 
 		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		
@@ -167,8 +165,6 @@ public class ConcesionarioLogicaTest {
 	public void actualizarConcesionarioErrorCodigoVacioTest() throws DatosObligatoriosNoPresentesException {
 		
 		final String CODIGO_CONCESIONARIO = "872YU";
-		final String CODIGO_CIUDAD = "227HIM";
-		final String NOMBRE_CIUDAD = "Santander";
 
 		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, NOMBRE_CIUDAD));
 		gestor.crearConcesionario( new Concesionario(

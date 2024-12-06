@@ -9,7 +9,7 @@ public interface IConcesionarioDAO {
 	
 	boolean create(Concesionario concesionario);
 	
-	Concesionario read();
+	Concesionario read(String codigo_concesionario);
 	
 	List<Concesionario> readAll();
 	

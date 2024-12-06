@@ -8,7 +8,7 @@ public interface ICiudadDAO {
 
 	boolean create(Ciudad ciudad);
 	
-	Ciudad read();
+	Ciudad read(String codigo);
 	
 	List<Ciudad> readAll();
 	

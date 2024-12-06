@@ -77,6 +77,26 @@ public class GestorConcesionarios {
 		//Actualizamos base de datos
 		return ciudadDAO.create(ciudad);
 	}
+	
+	public Ciudad leerCiudad(String codigo) throws DatosObligatoriosNoPresentesException {
+		
+		veriricaParametro(codigo, "codigo");
+		List<Concesionario> listaConcesionarios = concesionarioDAO.readAll();
+		
+		Ciudad ciudad = ciudadDAO.read(codigo);
+
+		if(ciudad==null) return null;
+		
+		//Devolvemos la ciudad con todos sus concesionarios
+		for (Concesionario concesionario : listaConcesionarios) {
+			if(concesionario.getCodigoCiudad().equals(ciudad.getCodigo())) {
+				ciudad.getListaConcesionarios().add(concesionario);
+			}
+		}
+		
+		return ciudad;
+		
+	}
 	/**
 	 * 
 	 * Leemos todas las ciudades
@@ -161,6 +181,25 @@ public class GestorConcesionarios {
 		return listaconcesionario;
 
 	}
+	
+	public Concesionario leerConcesionario(String codigo_concesionario) throws DatosObligatoriosNoPresentesException {
+		
+		veriricaParametro(codigo_concesionario, "codigo concesionario");
+		
+		Concesionario concesionario = concesionarioDAO.read(codigo_concesionario);
+		List<Coche> listaCoches = cocheDAO.readAll();
+		
+		if(concesionario==null)return null;
+		
+		for(Coche coche : listaCoches) {
+			if(coche.getCodigoConcesionario().equals(concesionario.getCodigoConcesionario())) {
+				concesionario.getListaCoche().add(coche);
+			}
+		}
+		
+		return concesionario;
+	}
+	
 	/**
 	 * 
 	 * Actualizamos el nombre del concesionario

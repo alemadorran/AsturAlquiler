@@ -43,9 +43,33 @@ public class CiudadDAOimpl implements ICiudadDAO{
 	}
 
 	@Override
-	public Ciudad read() {
-		// TODO Auto-generated method stub
-		return null;
+	public Ciudad read(String codigo) {
+		Connection conexion = null;
+		Statement st = null;
+		ConexionJDBC conexionJDBC = null;
+		ResultSet rs;
+		Ciudad ciudad = null;
+		String sentencia = "SELECT * FROM ciudad where codigo = "+ "'" + codigo + "';";
+		try {
+			conexionJDBC = ConexionJDBC.instace();
+			conexion = conexionJDBC.getConnection();
+			st = conexion.createStatement(); 
+			rs = st.executeQuery(sentencia);
+			
+			while (rs.next()) {
+				ciudad = new Ciudad(
+						rs.getString(1), //Código
+						rs.getString(2) // Nombre
+						);
+			}
+		} catch (SQLException e) {
+			LoggerAplicacion.logError(e);
+			return null;
+		}finally {
+			conexionJDBC.closeConnection();
+		}
+		
+		return ciudad;
 	}
 
 	@Override

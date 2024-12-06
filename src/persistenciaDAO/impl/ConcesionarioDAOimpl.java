@@ -10,6 +10,7 @@ import java.util.List;
 import excepciones.ErrorConexionJDBCException;
 import excepciones.MensajesError;
 import logger.LoggerAplicacion;
+import modelo.Ciudad;
 import modelo.Concesionario;
 import persistencia.ConexionJDBC;
 import persistenciaDAO.IConcesionarioDAO;
@@ -45,9 +46,34 @@ public class ConcesionarioDAOimpl implements IConcesionarioDAO{
 	}
 
 	@Override
-	public Concesionario read() {
-		// TODO Auto-generated method stub
-		return null;
+	public Concesionario read(String codigo_concesionario) {
+		Connection conexion = null;
+		Statement st = null;
+		ConexionJDBC conexionJDBC = null;
+		ResultSet rs;
+        Concesionario concesionario = null;
+		String sentencia = "SELECT * FROM concesionario where codigo_concesionario = "+ "'" + codigo_concesionario + "';";
+		try {
+			conexionJDBC = ConexionJDBC.instace();
+			conexion = conexionJDBC.getConnection();
+			st = conexion.createStatement(); 
+			rs = st.executeQuery(sentencia);
+			
+			while (rs.next()) {
+				concesionario = new Concesionario(
+						rs.getString(1), //Código
+						rs.getString(2), // Nombre
+						rs.getString(3) //codigo ciudad
+						);
+			}
+		} catch (SQLException e) {
+			LoggerAplicacion.logError(e);
+			return null;
+		}finally {
+			conexionJDBC.closeConnection();
+		}
+		
+		return concesionario;
 	}
 
 	@Override

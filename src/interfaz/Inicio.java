@@ -59,8 +59,12 @@ public class Inicio {
 	 */
 	public static void mostrarMenuInicio(){
 		System.out.println("##########################################");
-		System.out.println("###### BIENVENIDO A ASTURALQUILER.SA #####");
+		System.out.println("######                               #####");
+		System.out.println("######       ASTURALQUILER.SA        #####");
+		System.out.println("######   ALQUILER - CONCESIONARIOS   #####");
+		System.out.println("######                               #####");
 		System.out.println("##########################################");
+
 		int opcion;
 		 
 		do {
@@ -125,7 +129,8 @@ public class Inicio {
 		System.out.println("##########################################");	
 		System.out.println("1 Crear ciudad                           #");
 		System.out.println("2 Leer ciudades                          #");
-		System.out.println("3 Borrar ciudad                          #");
+		System.out.println("3 Leer ciudad                            #");
+		System.out.println("4 Borrar ciudad                          #");
 		System.out.println("0 Salir al menu principal                #");
 		
 		respuestaUsuario = obtenerRespuesta();
@@ -141,7 +146,10 @@ public class Inicio {
 		case 2:
 			 leerCiudades();
 			break;
-		case 3:
+		case 3: 
+			leerCiudad();
+			break;
+		case 4:
 			borrarCiudad();
 			break;
 		case 0:
@@ -155,6 +163,24 @@ public class Inicio {
 		}while(respuestaUsuario != 0);
 	}
 	
+	private static void leerCiudad() {
+		System.out.println("Indica el código de la ciudad a buscar: ");
+		String codigo = sc.nextLine();
+		try {
+			Ciudad ciudad = gestorConcesionarios.leerCiudad(codigo);
+			if(ciudad==null) System.out.println("La ciudad no está registrada en base de datos");
+			System.out.println("*********************************");
+			System.out.println("**********     CIUDAD     *******");
+			System.out.println("*********************************");
+			System.out.println(ciudad.toString());
+			System.out.println("*********************************");
+			System.out.println("**********     CIUDAD     *******");
+			System.out.println("*********************************");
+		} catch (DatosObligatoriosNoPresentesException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		}
+	}
 	private static void borrarCiudad() {
 		System.out.println("Indica el código de la ciudad a borrar: ");
 		String codigo = sc.nextLine();
@@ -227,8 +253,9 @@ public class Inicio {
 			System.out.println("##########################################");
 			System.out.println("1 Crear concesionario                    #");
 			System.out.println("2 Leer concesionarios                    #");
-			System.out.println("3 Actualizar concesionarios              #");
-			System.out.println("4 Borrar concesionario                   #");
+			System.out.println("3 Leer concesionario                     #");
+			System.out.println("4 Actualizar concesionarios              #");
+			System.out.println("5 Borrar concesionario                   #");
 			System.out.println("0 Salir al menu principal                #");
 			
 			respuestaUsuario = obtenerRespuesta();
@@ -245,9 +272,12 @@ public class Inicio {
 				leerConcesionarios();
 				break;
 			case 3:
-				actualizarConcesionario();
+				leerConcesionario();
 				break;
 			case 4:
+				actualizarConcesionario();
+				break;
+			case 5:
 				borrarConcesionario();
 				break;
 			case 0:
@@ -260,6 +290,25 @@ public class Inicio {
 		}while(respuestaUsuario != 0);
 	}
 
+	private static void leerConcesionario() {
+		System.out.println("Indica el código del concesionario a buscar: ");
+		String codigo = sc.nextLine();
+		try {
+			Concesionario concesionario = gestorConcesionarios.leerConcesionario(codigo);
+			if(concesionario==null) System.out.println("El concesionario no está registrado en base de datos");
+			System.out.println("*********************************");
+			System.out.println("**********  CONCESIONARIO *******");
+			System.out.println("*********************************");
+			System.out.println(concesionario.toString());
+			System.out.println("*********************************");
+			System.out.println("**********  CONCESIONARIO *******");
+			System.out.println("*********************************");
+		} catch (DatosObligatoriosNoPresentesException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		}
+		
+	}
 	private static void borrarConcesionario() throws ErrorInesperadoException {
 		System.out.println("Indica el código del concesionario a borrar: ");
 		String codigo = sc.nextLine();

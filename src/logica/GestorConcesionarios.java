@@ -19,6 +19,8 @@ import modelo.Coche;
 import modelo.Concesionario;
 import persistencia.GestionArchivoCSV;
 import persistencia.GestorJDBC;
+import persistenciaDAO.CiudadDAO;
+import persistenciaDAO.impl.CiudadDAOimpl;
 
 /**
  * 
@@ -37,6 +39,8 @@ public class GestorConcesionarios {
 	String CSV_CIUDAD = "";
 	String CSV_COCHE = "";
 	
+	private static CiudadDAO ciudadDAO;
+	
     /**
      * 
      * Constructor de la clase GestorConcesionarios
@@ -46,6 +50,8 @@ public class GestorConcesionarios {
 		listaCiudades = new ArrayList<>();
 		listaConcesionarios = new ArrayList<>();
 		listaCoches = new ArrayList<>();
+		
+		ciudadDAO = new CiudadDAOimpl();
 	}
 	/**
 	 * 
@@ -61,7 +67,7 @@ public class GestorConcesionarios {
 			veriricaParametro(ciudad.getNombre(), "nombre ciudad");
 		}
 		//Actualizamos base de datos
-		return GestorJDBC.crearCiudad(ciudad);
+		return ciudadDAO.create(ciudad);
 	}
 	/**
 	 * 
@@ -71,7 +77,7 @@ public class GestorConcesionarios {
 	 */
 	public List<Ciudad> leerCiudades() {
 		
-		List<Ciudad> listaCiudades = GestorJDBC.leerCiudades();		
+		List<Ciudad> listaCiudades = ciudadDAO.readAll();
 		return listaCiudades;
 		
 	}
@@ -83,13 +89,13 @@ public class GestorConcesionarios {
 	 * @param codigo : String
 	 * @throws CiudadNoEncontradaException
 	 */
-	public boolean borrarCiudad(String codigo) throws CiudadNoEncontradaException {
+	public boolean borrarCiudad(Ciudad ciudad) throws CiudadNoEncontradaException {
 		
 		boolean ciudadBorrada = true;
-		ciudadBorrada = GestorJDBC.borrarCiudad(codigo);
+		ciudadBorrada = ciudadDAO.detele(ciudad);
 		
 		if(ciudadBorrada == false) {
-			throw new CiudadNoEncontradaException("Ciudad no encontrada con el código: " + codigo);	
+			throw new CiudadNoEncontradaException("Ciudad no encontrada con el código: " + ciudad.getCodigo());	
 		}
 		return true;
 		
@@ -100,14 +106,16 @@ public class GestorConcesionarios {
 	 * Añadimos un nuevo concesionario.
 	 * 
 	 * @param nuevoConcesionario
+	 * @throws DatosObligatoriosNoPresentesException 
 	 */
-	public boolean crearConcesionario(Concesionario nuevoConcesionario) {
+	public boolean crearConcesionario(Concesionario nuevoConcesionario) throws DatosObligatoriosNoPresentesException {
 		
-		if(GestorJDBC.crearConcesionario(nuevoConcesionario)) {
-			return true;
-		}else {
-			return false;
+		if(nuevoConcesionario != null) {
+			veriricaParametro(nuevoConcesionario.getCodigoConcesionario(), "codigo concesionario");
+			veriricaParametro(nuevoConcesionario.getNombre(), "nombre concesionario");
 		}
+		
+		return GestorJDBC.crearConcesionario(nuevoConcesionario);
 		
 	}
 
@@ -133,10 +141,12 @@ public class GestorConcesionarios {
 	 * @param codigoC
 	 * @param nombreConcecionario
 	 * @throws ConcesionarioNoEncontradoException 
+	 * @throws DatosObligatoriosNoPresentesException 
 	 * @throws ErrorConexionJDBCException 
 	 */
-	public boolean actualizarConcesionario(String codigoC, String nombreConcecionario) throws ConcesionarioNoEncontradoException, ErrorConexionJDBCException {
-		
+	public boolean actualizarConcesionario(String codigoC, String nombreConcecionario) throws ConcesionarioNoEncontradoException, DatosObligatoriosNoPresentesException {
+	
+		veriricaParametro(codigoC, "código concesionario");
 	
 		Concesionario concesionarioAActualizar = null; 
 		
@@ -156,7 +166,12 @@ public class GestorConcesionarios {
 			//Modificamos nombre del concesionario
 			concesionarioAActualizar.setNombre(nombreConcecionario);
 			
-			return GestorJDBC.actualizarConcesionario(concesionarioAActualizar);
+			try {
+				return GestorJDBC.actualizarConcesionario(concesionarioAActualizar);
+			} catch (ErrorConexionJDBCException e) {
+				LoggerAplicacion.logError(e);
+				return false;
+			}
 			
 		}
 		
@@ -171,7 +186,7 @@ public class GestorConcesionarios {
 	 * @throws ConcesionarioNoEncontradoException 
 	 * @throws ErrorConexionJDBCException 
 	 */
-	public boolean borrarConcesionario(String codigo) throws ConcesionarioNoEncontradoException, ErrorConexionJDBCException {
+	public boolean borrarConcesionario(String codigo) throws ConcesionarioNoEncontradoException {
 		
 		Concesionario concesionarioABorrar = null;
 		
@@ -189,7 +204,12 @@ public class GestorConcesionarios {
 			throw new ConcesionarioNoEncontradoException(MensajesError.CONCESIONARIO_NO_ENCONTRADO + codigo);
 		}
 		//La borramos de la lista
-		return GestorJDBC.borrarConcesionario(concesionarioABorrar);
+		try {
+			return GestorJDBC.borrarConcesionario(concesionarioABorrar);
+		} catch (ErrorConexionJDBCException e) {
+			LoggerAplicacion.logError(e);
+			return false;
+		}
 		
 	}
 

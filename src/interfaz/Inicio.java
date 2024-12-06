@@ -1,6 +1,5 @@
 package interfaz;
 
-import java.lang.System.Logger;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ import logica.GestorConcesionarios;
 import modelo.Ciudad;
 import modelo.Coche;
 import modelo.Concesionario;
-import persistencia.ConexionJDBC;
+import persistenciaDAO.ConexionJDBC;
 
 
 /**
@@ -41,8 +40,7 @@ public class Inicio {
      * @param args
      */
 	public static void main(String[] args) {
-		iniciarBD();
-		
+		// A eliminar -> iniciarBD();
 		mostrarMenuInicio();
 		
 	}
@@ -104,6 +102,10 @@ public class Inicio {
 		
 		sc.close(); //Cerramos scanner
 	}
+	
+	//############################################################################################### 
+	//###################################  MENU CIUDAD  #############################################
+	//############################################################################################### 
 	/**
 	 * 
 	 * Menu de acciones con Ciudad
@@ -150,8 +152,9 @@ public class Inicio {
 	private static void borrarCiudad() {
 		System.out.println("Indica el código de la ciudad a borrar: ");
 		String codigo = sc.nextLine();
+		Ciudad ciudadABorrar = new Ciudad(codigo, "");
 		try {
-			gestorConcesionarios.borrarCiudad(codigo);
+			gestorConcesionarios.borrarCiudad(ciudadABorrar);
 			System.out.println("Ciudad con código " + codigo + " borrada correctamente.");
 		} catch (CiudadNoEncontradaException e) {
 			System.out.println(e.getMessage());
@@ -198,6 +201,11 @@ public class Inicio {
 			System.out.println("*********************************");
 		}
 	}
+	
+	//############################################################################################### 
+	//###################################  MENU CONCESIONARIO #######################################
+	//############################################################################################### 
+	
 	/**
 	 * 
 	 * Mostrar menu Concesionario
@@ -221,7 +229,11 @@ public class Inicio {
 			
 			switch (respuestaUsuario) {
 			case 1:
-				crearConcesionario();
+				try {
+					crearConcesionario();
+				} catch (DatosObligatoriosNoPresentesException e) {
+					System.out.println(e.getMessage());
+				}
 				break;
 			case 2:
 				leerConcesionarios();
@@ -242,7 +254,7 @@ public class Inicio {
 		}while(respuestaUsuario != 0);
 	}
 
-	private static void borrarConcesionario() throws ErrorInesperadoException, ErrorConexionJDBCException {
+	private static void borrarConcesionario() throws ErrorInesperadoException {
 		System.out.println("Indica el código del concesionario a borrar: ");
 		String codigo = sc.nextLine();
 		try {
@@ -253,7 +265,7 @@ public class Inicio {
 			LoggerAplicacion.logError(e);
 		}
 	}
-	private static void actualizarConcesionario() throws ErrorConexionJDBCException, ErrorInesperadoException {
+	private static void actualizarConcesionario() throws ErrorInesperadoException {
 		System.out.println();
 		System.out.println("#### Actualización de concesionarios ####");
 		System.out.print("Indica el codigo del concesionario: ");
@@ -265,6 +277,9 @@ public class Inicio {
 			if(gestorConcesionarios.actualizarConcesionario(codigoC, nombreConcesionario)) System.out.println("Concesionario modificado correctamente");
 			else throw new ErrorInesperadoException(MensajesError.ERROR_INESPERADO);
 		}catch (ConcesionarioNoEncontradoException e) {
+			System.out.println(e.getMessage());
+			LoggerAplicacion.logError(e);
+		} catch (DatosObligatoriosNoPresentesException e) {
 			System.out.println(e.getMessage());
 			LoggerAplicacion.logError(e);
 		}
@@ -283,7 +298,7 @@ public class Inicio {
 		
 		
 	}
-	private static void crearConcesionario() throws ErrorInesperadoException {
+	private static void crearConcesionario() throws ErrorInesperadoException, DatosObligatoriosNoPresentesException {
 		System.out.println();
 		System.out.print("Indica el código del concesionario: ");
 		String codigoCoche = sc.nextLine();
@@ -382,6 +397,8 @@ public class Inicio {
 		gestorConcesionarios.crearCocher(nuevoCoche);
 		
 	}
+	
+	//TODO a eliminar?
 	/**
 	 * Método para crear la base de datos
 	 */

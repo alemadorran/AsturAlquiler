@@ -1,7 +1,12 @@
 package test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,16 +23,17 @@ public class ConcesionarioLogicaTest {
 	GestorConcesionarios gestor = new GestorConcesionarios();
 	
 	@Test
-	public void crearConcesionarioOK() throws DatosObligatoriosNoPresentesException, CiudadNoEncontradaException, ErrorConexionJDBCException, ConcesionarioNoEncontradoException {
+	public void crearConcesionarioOKTest() throws DatosObligatoriosNoPresentesException, CiudadNoEncontradaException, ErrorConexionJDBCException, ConcesionarioNoEncontradoException {
 		
-		gestor.crearCiudad(new Ciudad ("AA45", "Santander"));
+		final String CODIGO_CIUDAD = "BB45";
 		
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
 		
 		
 		Concesionario concesionario = new Concesionario(
 				"31231",
 				"AutosMadrid",
-				"AA45");
+				CODIGO_CIUDAD);
 		
 		boolean concesionarioCreado = gestor.crearConcesionario(concesionario);
 		
@@ -36,16 +42,18 @@ public class ConcesionarioLogicaTest {
 		
 		//Limpiamos base de datos
 		gestor.borrarConcesionario(concesionario.getCodigoConcesionario());
-		gestor.borrarCiudad("AA45");	
+		gestor.borrarCiudad(CODIGO_CIUDAD);	
 	}
 	
 	@Test
-	public void crearConcesionarioCiudadNoExistenteError() {
+	public void crearConcesionarioCiudadNoExistenteErrorTest() throws DatosObligatoriosNoPresentesException {
+		
+		final String CODIGO_CIUDAD = "XX78";
 		
 		Concesionario concesionario = new Concesionario(
 				"31231",
 				"AutosMadrid",
-				"AA45");
+				CODIGO_CIUDAD);
 		
 		boolean concesionarioCreado = gestor.crearConcesionario(concesionario);
 
@@ -53,17 +61,107 @@ public class ConcesionarioLogicaTest {
 	}
 	
 	@Test
-	public void crearConcesionarioParamtrosVacios() {
+	public void crearConcesionarioParametrosVaciosTest() throws DatosObligatoriosNoPresentesException, ErrorConexionJDBCException, ConcesionarioNoEncontradoException, CiudadNoEncontradaException {
 		
-		Concesionario concesionario = new Concesionario(
+		final String CODIGO_CIUDAD = "LL89";
+		
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
+		
+		Concesionario concesionarioSinCodigo = new Concesionario(
 				"",
 				"AutosMadrid",
-				"AA45");
+				CODIGO_CIUDAD);
 		
-		boolean concesionarioCreado = gestor.crearConcesionario(concesionario);
+		Concesionario concesionarioSinNombre = new Concesionario(
+				"123",
+				"",
+				CODIGO_CIUDAD);
+				
+		assertThrows(DatosObligatoriosNoPresentesException.class, () -> {
+			gestor.crearConcesionario(concesionarioSinCodigo);
+		});
+		
+		assertThrows(DatosObligatoriosNoPresentesException.class, () -> {
+			gestor.crearConcesionario(concesionarioSinNombre);
+		});
+		
+		//Limpiamos base de datos
+		gestor.borrarCiudad(CODIGO_CIUDAD);	
+		
+	}
+	
+	@Test 
+	public void leerConcesionariosOkTest() throws DatosObligatoriosNoPresentesException, CiudadNoEncontradaException{
+		
+		final String CODIGO_CONCESIONARIO = "RT124";
+		final String CODIGO_CIUDAD = "78JDL";
+		
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
+		
+		gestor.crearConcesionario( new Concesionario(
+				CODIGO_CONCESIONARIO,
+				"AutosMadrid",
+				CODIGO_CIUDAD));
+		
+		ArrayList<Concesionario> listaConcesionarios = (ArrayList<Concesionario>) gestor.leerConcesionarios();
+		
+		assertTrue(listaConcesionarios.size() >= 1);
+		//Limpiamos base de datos
+		gestor.borrarCiudad(CODIGO_CIUDAD);
+		
+	}
+	
+	@Test
+	public void actualizarConcesionariosOKTest() throws DatosObligatoriosNoPresentesException, ConcesionarioNoEncontradoException {
+		
+		final String CODIGO_CONCESIONARIO = "UIO48";
+		final String CODIGO_CIUDAD = "098UJA";
+		
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
+		gestor.crearConcesionario( new Concesionario(
+				CODIGO_CONCESIONARIO,
+				"AutosMadrid",
+				CODIGO_CIUDAD));
+		
 
-		assertFalse(concesionarioCreado);
+		String nuevoNombreConcesionario = "NuevoAutosMadrid";
 		
+		boolean concesionarioActualizado = gestor.actualizarConcesionario(CODIGO_CONCESIONARIO, nuevoNombreConcesionario);
+		ArrayList<Concesionario> listaConcesionario = (ArrayList<Concesionario>) gestor.leerConcesionarios();
+		
+		//Buscamos el concesionario actualizado
+		Concesionario cActualizado = null; 
+		for(Concesionario concesionario : listaConcesionario) {
+			if(concesionario.getCodigoConcesionario().equals(CODIGO_CONCESIONARIO)) {
+				cActualizado = concesionario;
+			}
+		}
+		
+		assertTrue(concesionarioActualizado);
+		assertNotNull(cActualizado);
+		assertEquals(nuevoNombreConcesionario, cActualizado.getNombre());
+		
+		//Limpiamos base de datos 
+		gestor.borrarConcesionario(CODIGO_CONCESIONARIO);
+		
+	}
+	
+	@Test
+	public void actualizarConcesionarioErrorCodigoVacioTest() throws DatosObligatoriosNoPresentesException {
+		
+		final String CODIGO_CONCESIONARIO = "872YU";
+		final String CODIGO_CIUDAD = "227HIM";
+		
+		gestor.crearCiudad(new Ciudad (CODIGO_CIUDAD, "Santander"));
+		gestor.crearConcesionario( new Concesionario(
+				CODIGO_CONCESIONARIO,
+				"AutosMadrid",
+				CODIGO_CIUDAD));
+		
+		String nuevoNombreConcesionario = "";
+		
+		//boolean concesionarioActualizado = gestor.actualizarConcesionario(CODIGO_CONCESIONARIO, nuevoNombreConcesionario);
+
 	}
 	
 	

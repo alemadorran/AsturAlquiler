@@ -1,10 +1,9 @@
 package test;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.lang.System.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +14,19 @@ import excepciones.DatosObligatoriosNoPresentesException;
 import logger.LoggerAplicacion;
 import logica.GestorConcesionarios;
 import modelo.Ciudad;
+import persistenciaDAO.CiudadDAO;
+import persistenciaDAO.impl.CiudadDAOimpl;
 
 public class CiudadLogicaTest {
 	
 	GestorConcesionarios gestor = new GestorConcesionarios();
+	
+	public static CiudadDAO ciudadDAO;
+	
+	public CiudadLogicaTest() {
+		ciudadDAO = new CiudadDAOimpl();
+	}
+	
 	
 	@Test
 	public void crearCiudadOk() {
@@ -35,7 +43,7 @@ public class CiudadLogicaTest {
 		
 		//Limpiamos base de datos
 		try {
-			gestor.borrarCiudad(ciudad.getCodigo());
+			gestor.borrarCiudad(ciudad);
 		} catch (CiudadNoEncontradaException e) {
 			LoggerAplicacion.logError(e);
 		}
@@ -74,7 +82,7 @@ public class CiudadLogicaTest {
 		assertTrue(((ArrayList<Ciudad>)ciudades).size() >= 1);
 		//Limpiamos base de datos
 		try {
-			gestor.borrarCiudad(ciudad.getCodigo());
+			gestor.borrarCiudad(ciudad);
 		} catch (CiudadNoEncontradaException e) {
 			LoggerAplicacion.logError(e);
 		}
@@ -92,7 +100,7 @@ public class CiudadLogicaTest {
 		}
 		boolean ciudadBorrada = false;
 		try {
-			ciudadBorrada = gestor.borrarCiudad(ciudad.getCodigo());
+			ciudadBorrada = gestor.borrarCiudad(ciudad);
 		} catch (CiudadNoEncontradaException e) {
 			LoggerAplicacion.logError(e);
 		}

@@ -1,10 +1,7 @@
 package test;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 import java.util.ArrayList;
 import java.util.List;
 

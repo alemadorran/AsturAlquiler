@@ -13,6 +13,7 @@ import logger.LoggerAplicacion;
 import modelo.Ciudad;
 import modelo.Coche;
 import modelo.Concesionario;
+import persistenciaDAO.ConexionJDBC;
 
 public class GestorJDBC {
 	

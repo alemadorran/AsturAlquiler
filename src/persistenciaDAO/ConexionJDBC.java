@@ -1,4 +1,4 @@
-package persistencia;
+package persistenciaDAO;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -50,8 +50,8 @@ public class ConexionJDBC {
     private ConexionJDBC() {
         try {
         	Class.forName("com.mysql.cj.jdbc.Driver");
-            this.conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/",
-            		"root", "1234");
+            this.conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/asturalquiler",
+            		"root", "root");
         } catch (ClassNotFoundException e) {
 			 LoggerAplicacion.logError(e);
 		} catch (SQLException e) {
